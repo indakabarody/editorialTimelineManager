@@ -1,0 +1,571 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: EditorialTimelineManager 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11T09:47:00+00:00\n"
+"PO-Revision-Date: 2026-10-11T09:47:00+00:00\n"
+"Last-Translator: Indaka Barody\n"
+"Language-Team: English\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "plugins.generic.editorialTimelineManager.displayName"
+msgstr "Editorial Timeline Manager"
+
+msgid "plugins.generic.editorialTimelineManager.description"
+msgstr "Manage and retroactively adjust editorial workflow dates, file timestamps, review assignments, editorial decisions, and stage discussions for submissions."
+
+msgid "plugins.generic.editorialTimelineManager.tabTitle"
+msgstr "Editorial Timeline"
+
+msgid "plugins.generic.editorialTimelineManager.openManager"
+msgstr "Timeline Manager"
+
+msgid "plugins.generic.editorialTimelineManager.manage"
+msgstr "Manage"
+
+msgid "plugins.generic.editorialTimelineManager.pickerDescription"
+msgstr "Select a submission or enter its ID to inspect and adjust its editorial workflow timeline."
+
+msgid "plugins.generic.editorialTimelineManager.searchOrEnterId"
+msgstr "Search Submission by Title or ID"
+
+msgid "plugins.generic.editorialTimelineManager.searchPlaceholder"
+msgstr "Enter Submission ID (e.g. 12345) or title keywords..."
+
+msgid "plugins.generic.editorialTimelineManager.recentSubmissions"
+msgstr "Recent Submissions"
+
+msgid "plugins.generic.editorialTimelineManager.coreSubmissionDates"
+msgstr "Core Submission Dates"
+
+msgid "plugins.generic.editorialTimelineManager.help.dateSubmitted"
+msgstr "Original date and time when the author submitted the article."
+
+msgid "plugins.generic.editorialTimelineManager.noPublications"
+msgstr "No publications found for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.quickBatchShift"
+msgstr "Batch Timeline Shift / Offset"
+
+msgid "plugins.generic.editorialTimelineManager.quickBatchShiftDesc"
+msgstr "Shift the entire timeline backward or forward by a specific number of days, preserving the relative time intervals between events."
+
+msgid "plugins.generic.editorialTimelineManager.daysOffset"
+msgstr "Days Offset"
+
+msgid "plugins.generic.editorialTimelineManager.applyShiftToForm"
+msgstr "Apply Shift to Form"
+
+msgid "plugins.generic.editorialTimelineManager.bulkStageDateSetter"
+msgstr "Bulk Stage File Timestamp Setter"
+
+msgid "plugins.generic.editorialTimelineManager.bulkStageDesc"
+msgstr "Apply a unified upload timestamp (created_at) to all files in the selected workflow stage at once."
+
+msgid "plugins.generic.editorialTimelineManager.targetStage"
+msgstr "Target Stage"
+
+msgid "plugins.generic.editorialTimelineManager.targetDate"
+msgstr "Target Date & Time"
+
+msgid "plugins.generic.editorialTimelineManager.allFiles"
+msgstr "All Files in Submission"
+
+msgid "plugins.generic.editorialTimelineManager.now"
+msgstr "Now"
+
+msgid "plugins.generic.editorialTimelineManager.alsoUpdateModified"
+msgstr "Also update modification time (updated_at)"
+
+msgid "plugins.generic.editorialTimelineManager.applyDateToFiles"
+msgstr "Apply Date to Files"
+
+msgid "plugins.generic.editorialTimelineManager.uploadDate"
+msgstr "Upload Date"
+
+msgid "plugins.generic.editorialTimelineManager.modifiedDate"
+msgstr "Last Modified"
+
+msgid "plugins.generic.editorialTimelineManager.copyDateToOthers"
+msgstr "Copy date to all files in this stage"
+
+msgid "plugins.generic.editorialTimelineManager.noFilesFound"
+msgstr "No workflow files found for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.autoAlignChronology"
+msgstr "Auto-Align Chronology"
+
+msgid "plugins.generic.editorialTimelineManager.autoAlignChronologyDesc"
+msgstr "Automatically space review dates in logical chronological order (assigned -> notified -> confirmed -> completed -> acknowledged)."
+
+msgid "plugins.generic.editorialTimelineManager.noReviewsFound"
+msgstr "No review assignments found for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.decisionDate"
+msgstr "Decision Date"
+
+msgid "plugins.generic.editorialTimelineManager.noDecisionsFound"
+msgstr "No editorial decisions recorded for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.discussionPosted"
+msgstr "Discussion Started"
+
+msgid "plugins.generic.editorialTimelineManager.noDiscussionsFound"
+msgstr "No stage discussions found for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.generatedSqlScript"
+msgstr "Generated SQL Script"
+
+msgid "plugins.generic.editorialTimelineManager.sqlScriptDesc"
+msgstr "Atomic SQL transaction corresponding to your form inputs. You can execute this directly via phpMyAdmin or review it before saving."
+
+msgid "plugins.generic.editorialTimelineManager.clickRefreshToGenerate"
+msgstr "Click Refresh or switch tabs to generate SQL script preview."
+
+msgid "plugins.generic.editorialTimelineManager.copySql"
+msgstr "Copy SQL"
+
+msgid "plugins.generic.editorialTimelineManager.downloadSql"
+msgstr "Download .sql"
+
+msgid "plugins.generic.editorialTimelineManager.saveChanges"
+msgstr "Save Timeline Changes"
+
+msgid "plugins.generic.editorialTimelineManager.shiftTimeline"
+msgstr "Shift Timeline"
+
+msgid "plugins.generic.editorialTimelineManager.previewSql"
+msgstr "Preview SQL"
+
+msgid "plugins.generic.editorialTimelineManager.tab.overview"
+msgstr "Overview & Dates"
+
+msgid "plugins.generic.editorialTimelineManager.tab.files"
+msgstr "Workflow Files"
+
+msgid "plugins.generic.editorialTimelineManager.tab.reviews"
+msgstr "Peer Review"
+
+msgid "plugins.generic.editorialTimelineManager.tab.decisions"
+msgstr "Editorial Decisions"
+
+msgid "plugins.generic.editorialTimelineManager.tab.discussions"
+msgstr "Discussions"
+
+msgid "plugins.generic.editorialTimelineManager.tab.sql"
+msgstr "SQL Preview"
+
+msgid "plugins.generic.editorialTimelineManager.warning.notifiedBeforeAssigned"
+msgstr "Reviewer notified date is earlier than assigned date."
+
+msgid "plugins.generic.editorialTimelineManager.warning.confirmedBeforeNotified"
+msgstr "Reviewer confirmed date is earlier than notified date."
+
+msgid "plugins.generic.editorialTimelineManager.warning.completedBeforeAssigned"
+msgstr "Review completed date is earlier than assigned date."
+
+msgid "plugins.generic.editorialTimelineManager.warning.completedBeforeConfirmed"
+msgstr "Review completed date is earlier than confirmed date."
+
+msgid "plugins.generic.editorialTimelineManager.warning.acknowledgedBeforeCompleted"
+msgstr "Review acknowledged date is earlier than completed date."
+
+msgid "plugins.generic.editorialTimelineManager.error.submissionNotFound"
+msgstr "Submission not found or permission denied."
+
+msgid "plugins.generic.editorialTimelineManager.error.missingData"
+msgstr "Missing submission ID or timeline payload."
+
+msgid "plugins.generic.editorialTimelineManager.error.invalidJson"
+msgstr "Invalid timeline JSON payload."
+
+msgid "plugins.generic.editorialTimelineManager.success.saved"
+msgstr "Timeline changes saved successfully in database!"
+
+msgid "plugins.generic.editorialTimelineManager.log.timelineUpdated"
+msgstr "Editorial workflow timeline dates were modified by {$username} for submission #{$submissionId}."
+
+msgid "plugins.generic.editorialTimelineManager.saveToDbDirectly"
+msgstr "Save Directly"
+
+msgid "plugins.generic.editorialTimelineManager.updateDbDirectly1Click"
+msgstr "Update Database Directly (1-Click)"
+
+msgid "plugins.generic.editorialTimelineManager.applyToFormOnly"
+msgstr "Apply to Form Inputs"
+
+msgid "plugins.generic.editorialTimelineManager.success.filesDirectlyUpdated"
+msgstr "{$count} file timestamp(s) successfully updated in OJS database!"
+
+msgid "plugins.generic.editorialTimelineManager.success.reviewDirectlyUpdated"
+msgstr "Review assignment dates successfully updated in OJS database!"
+
+msgid "plugins.generic.editorialTimelineManager.saveReviewToDbDirectly"
+msgstr "Save Reviewer to Database"
+
+msgid "plugins.generic.editorialTimelineManager.backToPicker"
+msgstr "Back to Submissions"
+
+msgid "plugins.generic.editorialTimelineManager.loadingSubmission"
+msgstr "Loading editorial timeline #{$submissionId}..."
+
+msgid "plugins.generic.editorialTimelineManager.loadingDetails"
+msgstr "Retrieving files, reviews, and editorial decisions..."
+
+msgid "plugins.generic.editorialTimelineManager.loadingList"
+msgstr "Loading submissions list..."
+
+msgid "plugins.generic.editorialTimelineManager.loadError"
+msgstr "Failed to load timeline."
+
+msgid "plugins.generic.editorialTimelineManager.errorOccurred"
+msgstr "An error occurred: "
+
+msgid "plugins.generic.editorialTimelineManager.retry"
+msgstr "Retry"
+
+msgid "plugins.generic.editorialTimelineManager.noSubmissionsFound"
+msgstr "No matching submissions found."
+
+msgid "plugins.generic.editorialTimelineManager.searching"
+msgstr "Searching..."
+
+msgid "plugins.generic.editorialTimelineManager.savingToDb"
+msgstr "Saving to Database..."
+
+msgid "plugins.generic.editorialTimelineManager.savedSuccess"
+msgstr "Data in OJS database updated successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.selectDatePrompt"
+msgstr "Please select a target date and time."
+
+msgid "plugins.generic.editorialTimelineManager.confirmUpdateFiles"
+msgstr "Update database NOW for [{$stage}] to {$date}?"
+
+msgid "plugins.generic.editorialTimelineManager.confirmCopyDate"
+msgstr "Copy this timestamp ({$date}) to all files in this stage?"
+
+msgid "plugins.generic.editorialTimelineManager.dateCopiedSuccess"
+msgstr "Timestamp replicated to stage files in form."
+
+msgid "plugins.generic.editorialTimelineManager.reviewAlignedSuccess"
+msgstr "Aligned review assignment chronology in form."
+
+msgid "plugins.generic.editorialTimelineManager.specifyOffsetPrompt"
+msgstr "Please specify a positive or negative day offset to shift."
+
+msgid "plugins.generic.editorialTimelineManager.sqlCopied"
+msgstr "Verification SQL copied to clipboard."
+
+msgid "plugins.generic.editorialTimelineManager.appliedFilesToForm"
+msgstr "Applied date to {$count} file(s) in form inputs. Click \"{$saveBtn}\" to persist."
+
+msgid "plugins.generic.editorialTimelineManager.shiftedToForm"
+msgstr "Timeline shifted by {$days} days in form. Click \"{$saveBtn}\" to commit."
+
+msgid "plugins.generic.editorialTimelineManager.copy"
+msgstr "Copy"
+
+msgid "plugins.generic.editorialTimelineManager.publicationVersion"
+msgstr "Version"
+
+msgid "plugins.generic.editorialTimelineManager.uploader"
+msgstr "Uploader"
+
+msgid "plugins.generic.editorialTimelineManager.stage.submissionFiles"
+msgstr "Submission Files"
+
+msgid "plugins.generic.editorialTimelineManager.stage.reviewFiles"
+msgstr "Review Files"
+
+msgid "plugins.generic.editorialTimelineManager.stage.reviewAttachments"
+msgstr "Reviewer's Attachments"
+
+msgid "plugins.generic.editorialTimelineManager.stage.revisions"
+msgstr "Revisions"
+
+msgid "plugins.generic.editorialTimelineManager.stage.copyeditingDraftFiles"
+msgstr "Copyediting Draft Files"
+
+msgid "plugins.generic.editorialTimelineManager.stage.copyeditedFiles"
+msgstr "Copyedited Files"
+
+msgid "plugins.generic.editorialTimelineManager.stage.productionReadyFiles"
+msgstr "Production Ready Files"
+
+msgid "plugins.generic.editorialTimelineManager.stage.galleys"
+msgstr "Galleys"
+
+msgid "plugins.generic.editorialTimelineManager.stage.discussions"
+msgstr "Discussions"
+
+msgid "plugins.generic.editorialTimelineManager.stage.submission"
+msgstr "Submission"
+
+msgid "plugins.generic.editorialTimelineManager.stage.internalReview"
+msgstr "Internal Review"
+
+msgid "plugins.generic.editorialTimelineManager.stage.externalReview"
+msgstr "Review"
+
+msgid "plugins.generic.editorialTimelineManager.stage.editing"
+msgstr "Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.stage.production"
+msgstr "Production"
+
+msgid "plugins.generic.editorialTimelineManager.stage.stage"
+msgstr "Stage"
+
+msgid "plugins.generic.editorialTimelineManager.genre.article"
+msgstr "Article Text"
+
+msgid "plugins.generic.editorialTimelineManager.genre.other"
+msgstr "Other"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchInstrument"
+msgstr "Research Instrument"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchMaterials"
+msgstr "Research Materials"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchResults"
+msgstr "Research Results"
+
+msgid "plugins.generic.editorialTimelineManager.genre.transcripts"
+msgstr "Transcripts"
+
+msgid "plugins.generic.editorialTimelineManager.genre.dataAnalysis"
+msgstr "Data Analysis"
+
+msgid "plugins.generic.editorialTimelineManager.genre.dataSet"
+msgstr "Data Set"
+
+msgid "plugins.generic.editorialTimelineManager.genre.sourceTexts"
+msgstr "Source Texts"
+
+msgid "plugins.generic.editorialTimelineManager.decision.accept"
+msgstr "Accept Submission"
+
+msgid "plugins.generic.editorialTimelineManager.decision.requestRevisions"
+msgstr "Revisions Required"
+
+msgid "plugins.generic.editorialTimelineManager.decision.resubmit"
+msgstr "Resubmit for Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.decline"
+msgstr "Decline Submission"
+
+msgid "plugins.generic.editorialTimelineManager.decision.sendExternalReview"
+msgstr "Send to Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.newRound"
+msgstr "New Review Round"
+
+msgid "plugins.generic.editorialTimelineManager.decision.sendToProduction"
+msgstr "Send to Production"
+
+msgid "plugins.generic.editorialTimelineManager.decision.backToReview"
+msgstr "Back to Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.backToCopyediting"
+msgstr "Back to Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.decision.decision"
+msgstr "Decision"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.accept"
+msgstr "Accept Submission"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.revisions"
+msgstr "Revisions Required"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.resubmit"
+msgstr "Resubmit for Review"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.resubmitElsewhere"
+msgstr "Resubmit Elsewhere"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.decline"
+msgstr "Decline Submission"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.seeComments"
+msgstr "See Comments"
+
+msgid "plugins.generic.editorialTimelineManager.review.assigned"
+msgstr "Assigned"
+
+msgid "plugins.generic.editorialTimelineManager.review.notified"
+msgstr "Notified"
+
+msgid "plugins.generic.editorialTimelineManager.review.confirmed"
+msgstr "Confirmed"
+
+msgid "plugins.generic.editorialTimelineManager.review.due"
+msgstr "Due"
+
+msgid "plugins.generic.editorialTimelineManager.review.completed"
+msgstr "Completed"
+
+msgid "plugins.generic.editorialTimelineManager.review.acknowledged"
+msgstr "Acknowledged"
+
+msgid "plugins.generic.editorialTimelineManager.round"
+msgstr "Round"
+
+msgid "plugins.generic.editorialTimelineManager.editor"
+msgstr "Editor"
+
+msgid "plugins.generic.editorialTimelineManager.reviewer"
+msgstr "Reviewer"
+
+msgid "plugins.generic.editorialTimelineManager.author"
+msgstr "Author"
+
+msgid "plugins.generic.editorialTimelineManager.submitted"
+msgstr "Submitted"
+
+msgid "plugins.generic.editorialTimelineManager.published"
+msgstr "Published"
+
+msgid "plugins.generic.editorialTimelineManager.lastModified"
+msgstr "Last modified"
+
+msgid "plugins.generic.editorialTimelineManager.publication"
+msgstr "Publication"
+
+msgid "plugins.generic.editorialTimelineManager.fileName"
+msgstr "File Name"
+
+msgid "plugins.generic.editorialTimelineManager.action"
+msgstr "Action"
+
+msgid "plugins.generic.editorialTimelineManager.filter"
+msgstr "Filter"
+
+msgid "plugins.generic.editorialTimelineManager.all"
+msgstr "All"
+
+msgid "plugins.generic.editorialTimelineManager.dateCreated"
+msgstr "Date Created"
+
+msgid "plugins.generic.editorialTimelineManager.refresh"
+msgstr "Refresh"
+
+msgid "plugins.generic.editorialTimelineManager.search"
+msgstr "Search"
+
+msgid "plugins.generic.editorialTimelineManager.none"
+msgstr "None"
+
+msgid "plugins.generic.editorialTimelineManager.status.published"
+msgstr "Published"
+
+msgid "plugins.generic.editorialTimelineManager.status.queued"
+msgstr "Queued"
+
+msgid "plugins.generic.editorialTimelineManager.status.archived"
+msgstr "Archived"
+
+msgid "plugins.generic.editorialTimelineManager.status.unpublished"
+msgstr "Unpublished"
+
+msgid "plugins.generic.editorialTimelineManager.title"
+msgstr "Title"
+
+msgid "plugins.generic.editorialTimelineManager.tab.activityLog"
+msgstr "Activity Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.title"
+msgstr "Submission Activity Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.desc"
+msgstr "View, edit, or delete activity log entries for this submission. Changes are written directly to the database."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.id"
+msgstr "Log ID"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.dateLogged"
+msgstr "Date Logged"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.user"
+msgstr "User"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.selectUser"
+msgstr "Select User..."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.event"
+msgstr "Event / Description"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.actions"
+msgstr "Actions"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.update"
+msgstr "Update"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.delete"
+msgstr "Delete"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.confirmDelete"
+msgstr "Are you sure you want to delete this activity log entry? This action cannot be undone."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.addEntry"
+msgstr "Add Log Entry"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.cleanPluginLogs"
+msgstr "Clean Timeline Plugin Logs"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.confirmCleanPluginLogs"
+msgstr "Are you sure you want to delete all Editorial Timeline Manager audit logs for this submission?"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.noLogsFound"
+msgstr "No activity logs found for this submission."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.searchPlaceholder"
+msgstr "Filter activity logs by text, user, or ID..."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successUpdated"
+msgstr "Activity log entry #{$id} successfully updated in database!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successDeleted"
+msgstr "Activity log entry #{$id} successfully deleted from database!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successCreated"
+msgstr "New activity log entry successfully created!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successCleaned"
+msgstr "Successfully deleted {$count} plugin activity log entry(ies)!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.customMessageNotice"
+msgstr "Custom Message"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogBadge"
+msgstr "Timeline Manager Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.fillRequiredFields"
+msgstr "Please fill in both Date/Time and Message."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.saveEntry"
+msgstr "Save Log Entry"
+
+msgid "plugins.generic.editorialTimelineManager.save"
+msgstr "Save"
+
+msgid "plugins.generic.editorialTimelineManager.delete"
+msgstr "Delete"
+
+msgid "plugins.generic.editorialTimelineManager.cancel"
+msgstr "Cancel"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.allLogs"
+msgstr "All Logs"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.systemLogs"
+msgstr "System Logs"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogs"
+msgstr "Timeline Manager Logs"
+

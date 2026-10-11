@@ -1,0 +1,571 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: EditorialTimelineManager 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11T09:47:00+00:00\n"
+"PO-Revision-Date: 2026-10-11T09:47:00+00:00\n"
+"Last-Translator: Indaka Barody\n"
+"Language-Team: Indonesian\n"
+"Language: id_ID\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "plugins.generic.editorialTimelineManager.displayName"
+msgstr "Editorial Timeline Manager"
+
+msgid "plugins.generic.editorialTimelineManager.description"
+msgstr "Kelola dan sesuaikan tanggal alur kerja editorial, stempel waktu file unggahan, penugasan review, keputusan editor, dan diskusi tahapan untuk naskah."
+
+msgid "plugins.generic.editorialTimelineManager.tabTitle"
+msgstr "Timeline Editorial"
+
+msgid "plugins.generic.editorialTimelineManager.openManager"
+msgstr "Manajer Timeline"
+
+msgid "plugins.generic.editorialTimelineManager.manage"
+msgstr "Kelola"
+
+msgid "plugins.generic.editorialTimelineManager.pickerDescription"
+msgstr "Pilih naskah atau masukkan ID naskah untuk memeriksa dan menyesuaikan timeline alur kerja editorialnya."
+
+msgid "plugins.generic.editorialTimelineManager.searchOrEnterId"
+msgstr "Cari Naskah berdasarkan Judul atau ID"
+
+msgid "plugins.generic.editorialTimelineManager.searchPlaceholder"
+msgstr "Ketik ID Naskah (misal: 12345) atau kata kunci judul..."
+
+msgid "plugins.generic.editorialTimelineManager.recentSubmissions"
+msgstr "Naskah Terbaru"
+
+msgid "plugins.generic.editorialTimelineManager.coreSubmissionDates"
+msgstr "Tanggal Utama Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.help.dateSubmitted"
+msgstr "Tanggal dan waktu naskah pertama kali dikirimkan oleh penulis."
+
+msgid "plugins.generic.editorialTimelineManager.noPublications"
+msgstr "Belum ada publikasi tercatat untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.quickBatchShift"
+msgstr "Pergeseran Tanggal Sekaligus (Batch Shift / Offset)"
+
+msgid "plugins.generic.editorialTimelineManager.quickBatchShiftDesc"
+msgstr "Geser keseluruhan tanggal mundur atau maju sesuai jumlah hari yang ditentukan, dengan tetap menjaga selang waktu antar peristiwa."
+
+msgid "plugins.generic.editorialTimelineManager.daysOffset"
+msgstr "Pergeseran Hari (+/-)"
+
+msgid "plugins.generic.editorialTimelineManager.applyShiftToForm"
+msgstr "Terapkan Pergeseran ke Formulir"
+
+msgid "plugins.generic.editorialTimelineManager.bulkStageDateSetter"
+msgstr "Atur Tanggal File per Tahapan Sekaligus"
+
+msgid "plugins.generic.editorialTimelineManager.bulkStageDesc"
+msgstr "Terapkan stempel waktu unggah (created_at) yang sama ke seluruh file pada tahapan yang dipilih sekaligus."
+
+msgid "plugins.generic.editorialTimelineManager.targetStage"
+msgstr "Tahapan Target"
+
+msgid "plugins.generic.editorialTimelineManager.targetDate"
+msgstr "Tanggal & Waktu Target"
+
+msgid "plugins.generic.editorialTimelineManager.allFiles"
+msgstr "Semua File dalam Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.now"
+msgstr "Sekarang"
+
+msgid "plugins.generic.editorialTimelineManager.alsoUpdateModified"
+msgstr "Juga perbarui waktu modifikasi (updated_at)"
+
+msgid "plugins.generic.editorialTimelineManager.applyDateToFiles"
+msgstr "Terapkan Tanggal ke File"
+
+msgid "plugins.generic.editorialTimelineManager.uploadDate"
+msgstr "Tanggal Unggah"
+
+msgid "plugins.generic.editorialTimelineManager.modifiedDate"
+msgstr "Terakhir Diubah"
+
+msgid "plugins.generic.editorialTimelineManager.copyDateToOthers"
+msgstr "Salin tanggal ke seluruh file pada tahapan ini"
+
+msgid "plugins.generic.editorialTimelineManager.noFilesFound"
+msgstr "Tidak ada file alur kerja yang ditemukan untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.autoAlignChronology"
+msgstr "Ratakan Kronologi Otomatis"
+
+msgid "plugins.generic.editorialTimelineManager.autoAlignChronologyDesc"
+msgstr "Atur tanggal review secara berurutan dan logis (ditugaskan -> diberitahu -> dikonfirmasi -> selesai -> ucapan terima kasih)."
+
+msgid "plugins.generic.editorialTimelineManager.noReviewsFound"
+msgstr "Tidak ada penugasan reviewer yang ditemukan untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.decisionDate"
+msgstr "Tanggal Keputusan"
+
+msgid "plugins.generic.editorialTimelineManager.noDecisionsFound"
+msgstr "Tidak ada riwayat keputusan editor untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.discussionPosted"
+msgstr "Diskusi Dimulai"
+
+msgid "plugins.generic.editorialTimelineManager.noDiscussionsFound"
+msgstr "Tidak ada diskusi tahapan untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.generatedSqlScript"
+msgstr "Pratinjau Perintah SQL"
+
+msgid "plugins.generic.editorialTimelineManager.sqlScriptDesc"
+msgstr "Transaksi SQL atomik yang sesuai dengan isian formulir Anda. Anda dapat menjalankannya di phpMyAdmin atau memeriksanya sebelum disimpan."
+
+msgid "plugins.generic.editorialTimelineManager.clickRefreshToGenerate"
+msgstr "Klik Segarkan atau buka tab untuk melihat pratinjau perintah SQL."
+
+msgid "plugins.generic.editorialTimelineManager.copySql"
+msgstr "Salin SQL"
+
+msgid "plugins.generic.editorialTimelineManager.downloadSql"
+msgstr "Unduh .sql"
+
+msgid "plugins.generic.editorialTimelineManager.saveChanges"
+msgstr "Simpan Perubahan Timeline"
+
+msgid "plugins.generic.editorialTimelineManager.shiftTimeline"
+msgstr "Geser Timeline"
+
+msgid "plugins.generic.editorialTimelineManager.previewSql"
+msgstr "Pratinjau SQL"
+
+msgid "plugins.generic.editorialTimelineManager.tab.overview"
+msgstr "Ringkasan & Tanggal Inti"
+
+msgid "plugins.generic.editorialTimelineManager.tab.files"
+msgstr "File Alur Kerja"
+
+msgid "plugins.generic.editorialTimelineManager.tab.reviews"
+msgstr "Peer Review"
+
+msgid "plugins.generic.editorialTimelineManager.tab.decisions"
+msgstr "Keputusan Editor"
+
+msgid "plugins.generic.editorialTimelineManager.tab.discussions"
+msgstr "Diskusi Tahapan"
+
+msgid "plugins.generic.editorialTimelineManager.tab.sql"
+msgstr "Pratinjau SQL"
+
+msgid "plugins.generic.editorialTimelineManager.warning.notifiedBeforeAssigned"
+msgstr "Tanggal pemberitahuan lebih awal dari tanggal penugasan."
+
+msgid "plugins.generic.editorialTimelineManager.warning.confirmedBeforeNotified"
+msgstr "Tanggal konfirmasi lebih awal dari tanggal pemberitahuan."
+
+msgid "plugins.generic.editorialTimelineManager.warning.completedBeforeAssigned"
+msgstr "Tanggal selesai review lebih awal dari tanggal penugasan."
+
+msgid "plugins.generic.editorialTimelineManager.warning.completedBeforeConfirmed"
+msgstr "Tanggal selesai review lebih awal dari tanggal konfirmasi."
+
+msgid "plugins.generic.editorialTimelineManager.warning.acknowledgedBeforeCompleted"
+msgstr "Tanggal ucapan terima kasih lebih awal dari tanggal selesai review."
+
+msgid "plugins.generic.editorialTimelineManager.error.submissionNotFound"
+msgstr "Naskah tidak ditemukan atau hak akses ditolak."
+
+msgid "plugins.generic.editorialTimelineManager.error.missingData"
+msgstr "ID naskah atau data timeline tidak lengkap."
+
+msgid "plugins.generic.editorialTimelineManager.error.invalidJson"
+msgstr "Format data JSON timeline tidak valid."
+
+msgid "plugins.generic.editorialTimelineManager.success.saved"
+msgstr "Perubahan timeline berhasil disimpan ke dalam database!"
+
+msgid "plugins.generic.editorialTimelineManager.log.timelineUpdated"
+msgstr "Tanggal timeline editorial naskah #{$submissionId} telah disesuaikan oleh {$username}."
+
+msgid "plugins.generic.editorialTimelineManager.saveToDbDirectly"
+msgstr "Simpan Langsung"
+
+msgid "plugins.generic.editorialTimelineManager.updateDbDirectly1Click"
+msgstr "Perbarui Database Langsung (1-Klik)"
+
+msgid "plugins.generic.editorialTimelineManager.applyToFormOnly"
+msgstr "Terapkan ke Isian Formulir"
+
+msgid "plugins.generic.editorialTimelineManager.success.filesDirectlyUpdated"
+msgstr "Berhasil memperbarui stempel waktu {$count} berkas langsung di database OJS!"
+
+msgid "plugins.generic.editorialTimelineManager.success.reviewDirectlyUpdated"
+msgstr "Jadwal reviewer berhasil langsung diperbarui di database OJS!"
+
+msgid "plugins.generic.editorialTimelineManager.saveReviewToDbDirectly"
+msgstr "Simpan Reviewer ke Database"
+
+msgid "plugins.generic.editorialTimelineManager.backToPicker"
+msgstr "Kembali ke Daftar Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.loadingSubmission"
+msgstr "Memuat timeline editorial #{$submissionId}..."
+
+msgid "plugins.generic.editorialTimelineManager.loadingDetails"
+msgstr "Mengambil data berkas, review, dan keputusan editorial..."
+
+msgid "plugins.generic.editorialTimelineManager.loadingList"
+msgstr "Memuat daftar naskah..."
+
+msgid "plugins.generic.editorialTimelineManager.loadError"
+msgstr "Gagal memuat timeline."
+
+msgid "plugins.generic.editorialTimelineManager.errorOccurred"
+msgstr "Terjadi kesalahan: "
+
+msgid "plugins.generic.editorialTimelineManager.retry"
+msgstr "Coba Muat Ulang"
+
+msgid "plugins.generic.editorialTimelineManager.noSubmissionsFound"
+msgstr "Tidak ditemukan naskah yang cocok."
+
+msgid "plugins.generic.editorialTimelineManager.searching"
+msgstr "Mencari..."
+
+msgid "plugins.generic.editorialTimelineManager.savingToDb"
+msgstr "Menyimpan ke Database..."
+
+msgid "plugins.generic.editorialTimelineManager.savedSuccess"
+msgstr "Data di database OJS berhasil langsung diperbarui!"
+
+msgid "plugins.generic.editorialTimelineManager.selectDatePrompt"
+msgstr "Silakan pilih tanggal dan waktu target."
+
+msgid "plugins.generic.editorialTimelineManager.confirmUpdateFiles"
+msgstr "Perbarui database SEKARANG untuk [{$stage}] ke {$date}?"
+
+msgid "plugins.generic.editorialTimelineManager.confirmCopyDate"
+msgstr "Salin stempel waktu ini ({$date}) ke seluruh berkas pada tahapan ini?"
+
+msgid "plugins.generic.editorialTimelineManager.dateCopiedSuccess"
+msgstr "Stempel waktu berhasil disalin ke berkas tahapan dalam formulir."
+
+msgid "plugins.generic.editorialTimelineManager.reviewAlignedSuccess"
+msgstr "Kronologi penugasan reviewer berhasil diratakan dalam formulir."
+
+msgid "plugins.generic.editorialTimelineManager.specifyOffsetPrompt"
+msgstr "Silakan tentukan jumlah hari pergeseran (positif atau negatif)."
+
+msgid "plugins.generic.editorialTimelineManager.sqlCopied"
+msgstr "Perintah SQL verifikasi berhasil disalin."
+
+msgid "plugins.generic.editorialTimelineManager.appliedFilesToForm"
+msgstr "Tanggal diterapkan ke {$count} berkas dalam formulir. Klik \"{$saveBtn}\" untuk menyimpan."
+
+msgid "plugins.generic.editorialTimelineManager.shiftedToForm"
+msgstr "Timeline digeser sebanyak {$days} hari dalam formulir. Klik \"{$saveBtn}\" untuk menyimpan."
+
+msgid "plugins.generic.editorialTimelineManager.copy"
+msgstr "Salin"
+
+msgid "plugins.generic.editorialTimelineManager.publicationVersion"
+msgstr "Versi"
+
+msgid "plugins.generic.editorialTimelineManager.uploader"
+msgstr "Pengunggah"
+
+msgid "plugins.generic.editorialTimelineManager.stage.submissionFiles"
+msgstr "File Pengajuan"
+
+msgid "plugins.generic.editorialTimelineManager.stage.reviewFiles"
+msgstr "File Review"
+
+msgid "plugins.generic.editorialTimelineManager.stage.reviewAttachments"
+msgstr "Lampiran Reviewer"
+
+msgid "plugins.generic.editorialTimelineManager.stage.revisions"
+msgstr "Revisi"
+
+msgid "plugins.generic.editorialTimelineManager.stage.copyeditingDraftFiles"
+msgstr "Draf Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.stage.copyeditedFiles"
+msgstr "File Hasil Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.stage.productionReadyFiles"
+msgstr "File Siap Produksi"
+
+msgid "plugins.generic.editorialTimelineManager.stage.galleys"
+msgstr "Galai (Galleys)"
+
+msgid "plugins.generic.editorialTimelineManager.stage.discussions"
+msgstr "Diskusi"
+
+msgid "plugins.generic.editorialTimelineManager.stage.submission"
+msgstr "Pengajuan"
+
+msgid "plugins.generic.editorialTimelineManager.stage.internalReview"
+msgstr "Review Internal"
+
+msgid "plugins.generic.editorialTimelineManager.stage.externalReview"
+msgstr "Review"
+
+msgid "plugins.generic.editorialTimelineManager.stage.editing"
+msgstr "Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.stage.production"
+msgstr "Produksi"
+
+msgid "plugins.generic.editorialTimelineManager.stage.stage"
+msgstr "Tahapan"
+
+msgid "plugins.generic.editorialTimelineManager.genre.article"
+msgstr "Teks Artikel"
+
+msgid "plugins.generic.editorialTimelineManager.genre.other"
+msgstr "Lainnya"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchInstrument"
+msgstr "Instrumen Penelitian"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchMaterials"
+msgstr "Bahan Penelitian"
+
+msgid "plugins.generic.editorialTimelineManager.genre.researchResults"
+msgstr "Hasil Penelitian"
+
+msgid "plugins.generic.editorialTimelineManager.genre.transcripts"
+msgstr "Transkrip"
+
+msgid "plugins.generic.editorialTimelineManager.genre.dataAnalysis"
+msgstr "Analisis Data"
+
+msgid "plugins.generic.editorialTimelineManager.genre.dataSet"
+msgstr "Kumpulan Data"
+
+msgid "plugins.generic.editorialTimelineManager.genre.sourceTexts"
+msgstr "Teks Sumber"
+
+msgid "plugins.generic.editorialTimelineManager.decision.accept"
+msgstr "Terima Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.decision.requestRevisions"
+msgstr "Perlu Revisi"
+
+msgid "plugins.generic.editorialTimelineManager.decision.resubmit"
+msgstr "Kirim Ulang untuk Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.decline"
+msgstr "Tolak Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.decision.sendExternalReview"
+msgstr "Kirim ke Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.newRound"
+msgstr "Putaran Review Baru"
+
+msgid "plugins.generic.editorialTimelineManager.decision.sendToProduction"
+msgstr "Kirim ke Produksi"
+
+msgid "plugins.generic.editorialTimelineManager.decision.backToReview"
+msgstr "Kembali ke Review"
+
+msgid "plugins.generic.editorialTimelineManager.decision.backToCopyediting"
+msgstr "Kembali ke Copyediting"
+
+msgid "plugins.generic.editorialTimelineManager.decision.decision"
+msgstr "Keputusan"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.accept"
+msgstr "Terima Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.revisions"
+msgstr "Perlu Revisi"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.resubmit"
+msgstr "Kirim Ulang untuk Review"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.resubmitElsewhere"
+msgstr "Kirim Ulang ke Tempat Lain"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.decline"
+msgstr "Tolak Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.recommendation.seeComments"
+msgstr "Lihat Komentar"
+
+msgid "plugins.generic.editorialTimelineManager.review.assigned"
+msgstr "Ditugaskan"
+
+msgid "plugins.generic.editorialTimelineManager.review.notified"
+msgstr "Diberitahukan"
+
+msgid "plugins.generic.editorialTimelineManager.review.confirmed"
+msgstr "Dikonfirmasi"
+
+msgid "plugins.generic.editorialTimelineManager.review.due"
+msgstr "Batas Waktu"
+
+msgid "plugins.generic.editorialTimelineManager.review.completed"
+msgstr "Selesai"
+
+msgid "plugins.generic.editorialTimelineManager.review.acknowledged"
+msgstr "Diakui (Diterima)"
+
+msgid "plugins.generic.editorialTimelineManager.round"
+msgstr "Putaran"
+
+msgid "plugins.generic.editorialTimelineManager.editor"
+msgstr "Editor"
+
+msgid "plugins.generic.editorialTimelineManager.reviewer"
+msgstr "Reviewer"
+
+msgid "plugins.generic.editorialTimelineManager.author"
+msgstr "Penulis"
+
+msgid "plugins.generic.editorialTimelineManager.submitted"
+msgstr "Dikirim"
+
+msgid "plugins.generic.editorialTimelineManager.published"
+msgstr "Diterbitkan"
+
+msgid "plugins.generic.editorialTimelineManager.lastModified"
+msgstr "Terakhir diubah"
+
+msgid "plugins.generic.editorialTimelineManager.publication"
+msgstr "Publikasi"
+
+msgid "plugins.generic.editorialTimelineManager.fileName"
+msgstr "Nama File"
+
+msgid "plugins.generic.editorialTimelineManager.action"
+msgstr "Tindakan"
+
+msgid "plugins.generic.editorialTimelineManager.filter"
+msgstr "Saring"
+
+msgid "plugins.generic.editorialTimelineManager.all"
+msgstr "Semua"
+
+msgid "plugins.generic.editorialTimelineManager.dateCreated"
+msgstr "Tanggal Dibuat"
+
+msgid "plugins.generic.editorialTimelineManager.refresh"
+msgstr "Segarkan"
+
+msgid "plugins.generic.editorialTimelineManager.search"
+msgstr "Cari"
+
+msgid "plugins.generic.editorialTimelineManager.none"
+msgstr "Tidak ada"
+
+msgid "plugins.generic.editorialTimelineManager.status.published"
+msgstr "Diterbitkan"
+
+msgid "plugins.generic.editorialTimelineManager.status.queued"
+msgstr "Dalam Antrean"
+
+msgid "plugins.generic.editorialTimelineManager.status.archived"
+msgstr "Diarsipkan"
+
+msgid "plugins.generic.editorialTimelineManager.status.unpublished"
+msgstr "Belum Diterbitkan"
+
+msgid "plugins.generic.editorialTimelineManager.title"
+msgstr "Judul"
+
+msgid "plugins.generic.editorialTimelineManager.tab.activityLog"
+msgstr "Log Aktivitas"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.title"
+msgstr "Log Aktivitas Naskah"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.desc"
+msgstr "Lihat, edit, atau hapus rekaman log aktivitas untuk naskah ini. Perubahan ditulis langsung ke database."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.id"
+msgstr "ID Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.dateLogged"
+msgstr "Waktu Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.user"
+msgstr "Pengguna"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.selectUser"
+msgstr "Pilih Pengguna..."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.event"
+msgstr "Peristiwa / Deskripsi"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.actions"
+msgstr "Aksi"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.update"
+msgstr "Perbarui"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.delete"
+msgstr "Hapus"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.confirmDelete"
+msgstr "Apakah Anda yakin ingin menghapus entri log aktivitas ini? Tindakan ini tidak dapat dibatalkan."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.addEntry"
+msgstr "Tambah Entri Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.cleanPluginLogs"
+msgstr "Bersihkan Log Timeline Plugin"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.confirmCleanPluginLogs"
+msgstr "Apakah Anda yakin ingin menghapus semua log audit Editorial Timeline Manager untuk naskah ini?"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.noLogsFound"
+msgstr "Tidak ada log aktivitas yang ditemukan untuk naskah ini."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.searchPlaceholder"
+msgstr "Filter log aktivitas berdasarkan teks, pengguna, atau ID..."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successUpdated"
+msgstr "Entri log aktivitas #{$id} berhasil diperbarui di database!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successDeleted"
+msgstr "Entri log aktivitas #{$id} berhasil dihapus dari database!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successCreated"
+msgstr "Entri log aktivitas baru berhasil dibuat!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.successCleaned"
+msgstr "Berhasil menghapus {$count} entri log aktivitas plugin!"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.customMessageNotice"
+msgstr "Pesan Kustom"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogBadge"
+msgstr "Log Timeline Manager"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.fillRequiredFields"
+msgstr "Harap isi Waktu Log dan Pesan terlebih dahulu."
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.saveEntry"
+msgstr "Simpan Entri Log"
+
+msgid "plugins.generic.editorialTimelineManager.save"
+msgstr "Simpan"
+
+msgid "plugins.generic.editorialTimelineManager.delete"
+msgstr "Hapus"
+
+msgid "plugins.generic.editorialTimelineManager.cancel"
+msgstr "Batal"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.allLogs"
+msgstr "Semua Log"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.systemLogs"
+msgstr "Log Sistem"
+
+msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogs"
+msgstr "Log Timeline Manager"
+
