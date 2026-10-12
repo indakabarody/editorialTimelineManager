@@ -11,6 +11,7 @@
 <div class="editorial-timeline-picker-wrapper" id="etmPickerWrapper">
 	<div class="editorial-timeline-picker-header">
 		<div class="editorial-timeline-badge-title">
+			<i class="fa fa-history"></i>
 			<h3>{translate key="plugins.generic.editorialTimelineManager.displayName"}</h3>
 		</div>
 		<p class="etm-subtitle">{translate key="plugins.generic.editorialTimelineManager.pickerDescription"}</p>
@@ -29,8 +30,9 @@
 						placeholder="{translate key="plugins.generic.editorialTimelineManager.searchPlaceholder"}"
 						autocomplete="off"
 					/>
-					<button type="button" id="etmSearchButton" class="pkp_button pkp_button_primary" style="cursor: pointer;">
-						{translate key="plugins.generic.editorialTimelineManager.search"}
+					<button type="button" id="etmSearchButton" class="pkp_button pkp_button_primary">
+						<i class="fa fa-search"></i>
+						<span>{translate key="plugins.generic.editorialTimelineManager.search"}</span>
 					</button>
 				</div>
 			</div>
@@ -38,51 +40,55 @@
 	</div>
 
 	<!-- Recent Submissions List -->
-	<div class="etm-table-container">
-		<h4>{translate key="plugins.generic.editorialTimelineManager.recentSubmissions"}</h4>
-		<table class="pkp_table etm-table" id="etmSubmissionsTable">
-			<thead>
-				<tr>
-					<th style="width: 80px;">ID</th>
-					<th>{translate key="plugins.generic.editorialTimelineManager.title"}</th>
-					<th style="width: 140px;">{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
-					<th style="width: 160px;">{translate key="plugins.generic.editorialTimelineManager.submitted"}</th>
-					<th style="width: 120px; text-align: right;">{translate key="plugins.generic.editorialTimelineManager.action"}</th>
-				</tr>
-			</thead>
-			<tbody id="etmSubmissionsTbody">
-				{if $submissions && count($submissions) > 0}
-					{foreach from=$submissions item=sub}
-						<tr data-submission-id="{$sub.submission_id}">
-							<td><strong>#{$sub.submission_id}</strong></td>
-							<td>
-								<a href="javascript:void(0);" class="etm-submission-link" data-submission-id="{$sub.submission_id}" style="color: #2563eb; font-weight: 600; text-decoration: none; cursor: pointer;">
-									{$sub.title|escape}
-								</a>
-							</td>
-							<td><span class="etm-stage-badge">{$sub.stage_name|escape}</span></td>
-							<td>{$sub.date_submitted|escape}</td>
-							<td style="text-align: right;">
-								<button
-									type="button"
-									class="pkp_button pkp_button_primary etm-open-btn"
-									data-submission-id="{$sub.submission_id}"
-									style="cursor: pointer;"
-								>
-									{translate key="plugins.generic.editorialTimelineManager.manage"}
-								</button>
+	<div class="etm-card">
+		<div class="etm-card-header">
+			<h4><i class="fa fa-list"></i> {translate key="plugins.generic.editorialTimelineManager.recentSubmissions"}</h4>
+		</div>
+		<div class="etm-table-responsive" style="margin-bottom: 0; border: none; border-radius: 0;">
+			<table class="etm-table" id="etmSubmissionsTable">
+				<thead>
+					<tr>
+						<th style="width: 80px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
+						<th>{translate key="plugins.generic.editorialTimelineManager.title"}</th>
+						<th style="width: 150px;">{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
+						<th style="width: 170px;">{translate key="plugins.generic.editorialTimelineManager.submitted"}</th>
+						<th style="width: 120px; text-align: right;">{translate key="plugins.generic.editorialTimelineManager.action"}</th>
+					</tr>
+				</thead>
+				<tbody id="etmSubmissionsTbody">
+					{if $submissions && count($submissions) > 0}
+						{foreach from=$submissions item=sub}
+							<tr data-submission-id="{$sub.submission_id}">
+								<td><strong>#{$sub.submission_id}</strong></td>
+								<td>
+									<a href="javascript:void(0);" class="etm-submission-link" data-submission-id="{$sub.submission_id}">
+										{$sub.title|escape}
+									</a>
+								</td>
+								<td><span class="etm-stage-badge">{$sub.stage_name|escape}</span></td>
+								<td>{$sub.date_submitted|escape}</td>
+								<td style="text-align: right;">
+									<button
+										type="button"
+										class="pkp_button pkp_button_primary etm-open-btn"
+										data-submission-id="{$sub.submission_id}"
+									>
+										<i class="fa fa-pencil"></i>
+										<span>{translate key="plugins.generic.editorialTimelineManager.manage"}</span>
+									</button>
+								</td>
+							</tr>
+						{/foreach}
+					{else}
+						<tr>
+							<td colspan="5" style="text-align: center; color: #64748b; padding: 25px;">
+								{translate key="plugins.generic.editorialTimelineManager.noSubmissionsFound"}
 							</td>
 						</tr>
-					{/foreach}
-				{else}
-					<tr>
-						<td colspan="5" style="text-align: center; color: #666; padding: 20px;">
-							{translate key="plugins.generic.editorialTimelineManager.noSubmissionsFound"}
-						</td>
-					</tr>
-				{/if}
-			</tbody>
-		</table>
+					{/if}
+				</tbody>
+			</table>
+		</div>
 	</div>
 </div>
 
@@ -90,6 +96,7 @@
 (function($) {ldelim}
 	window.EditorialTimelineLocales = window.EditorialTimelineLocales || {};
 	$.extend(window.EditorialTimelineLocales, {ldelim}
+		displayName: '{translate key="plugins.generic.editorialTimelineManager.displayName"}',
 		loadingSubmission: '{translate key="plugins.generic.editorialTimelineManager.loadingSubmission"}',
 		loadingDetails: '{translate key="plugins.generic.editorialTimelineManager.loadingDetails"}',
 		loadingList: '{translate key="plugins.generic.editorialTimelineManager.loadingList"}',
@@ -110,10 +117,10 @@
 		dateCopiedSuccess: '{translate key="plugins.generic.editorialTimelineManager.dateCopiedSuccess"}',
 		reviewAlignedSuccess: '{translate key="plugins.generic.editorialTimelineManager.reviewAlignedSuccess"}',
 		specifyOffsetPrompt: '{translate key="plugins.generic.editorialTimelineManager.specifyOffsetPrompt"}',
-		sqlCopied: '{translate key="plugins.generic.editorialTimelineManager.sqlCopied"}',
 		appliedFilesToForm: '{translate key="plugins.generic.editorialTimelineManager.appliedFilesToForm"}',
 		shiftedToForm: '{translate key="plugins.generic.editorialTimelineManager.shiftedToForm"}',
-		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}'
+		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}',
+		networkError: '{translate key="plugins.generic.editorialTimelineManager.error.network"}'
 	{rdelim});
 
 	function t(key, fallback, replacements) {ldelim}
@@ -150,7 +157,7 @@
 
 		$target.html(
 			'<div style="text-align: center; padding: 70px 20px;">' +
-				'<div style="display: inline-block; width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: etmSpin 0.8s linear infinite;"></div>' +
+				'<div style="display: inline-block; width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #006798; border-radius: 50%; animation: etmSpin 0.8s linear infinite;"></div>' +
 				'<h3 style="margin-top: 18px; color: #1e293b; font-size: 16px; font-weight: 700;">' + t('loadingSubmission', 'Loading editorial timeline #' + submissionId + '...', {ldelim}submissionId: submissionId{rdelim}) + '</h3>' +
 				'<p style="color: #64748b; font-size: 13px; margin-top: 6px;">' + t('loadingDetails', 'Retrieving files, reviews, and editorial decisions...') + '</p>' +
 			'</div>'
@@ -175,7 +182,7 @@
 					$target.html(
 						'<div style="text-align: center; padding: 40px 20px;">' +
 							'<p style="color: #dc2626; font-weight: 600;">' + $('<div>').text(errorMsg).html() + '</p>' +
-							'<button type="button" class="pkp_button" id="etmBackToPickerBtnErr" style="margin-top: 15px;">' + t('backToPicker', 'Back to Submissions') + '</button>' +
+							'<button type="button" class="pkp_button" id="etmBackToPickerBtnErr" style="margin-top: 15px;"><i class="fa fa-arrow-left"></i> ' + t('backToPicker', 'Back to Submissions') + '</button>' +
 						'</div>'
 					);
 					$('#etmBackToPickerBtnErr').on('click', function() {ldelim}
@@ -187,7 +194,7 @@
 				$target.html(
 					'<div style="text-align: center; padding: 40px 20px;">' +
 						'<p style="color: #dc2626; font-weight: 600;">' + t('errorOccurred', 'An error occurred: ') + err + '</p>' +
-						'<button type="button" class="pkp_button" id="etmBackToPickerBtnErr" style="margin-top: 15px;">' + t('backToPicker', 'Back to Submissions') + '</button>' +
+						'<button type="button" class="pkp_button" id="etmBackToPickerBtnErr" style="margin-top: 15px;"><i class="fa fa-arrow-left"></i> ' + t('backToPicker', 'Back to Submissions') + '</button>' +
 					'</div>'
 				);
 				$('#etmBackToPickerBtnErr').on('click', function() {ldelim}
@@ -228,7 +235,7 @@
 		var $btn = $('#etmSearchButton');
 		var $tbody = $('#etmSubmissionsTbody');
 
-		$btn.prop('disabled', true).text(t('searching', 'Searching...'));
+		$btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> <span>' + t('searching', 'Searching...') + '</span>');
 
 		$.ajax({ldelim}
 			url: searchUrl,
@@ -236,13 +243,13 @@
 			dataType: 'json',
 			data: {ldelim} query: query {rdelim},
 			success: function(resp) {ldelim}
-				$btn.prop('disabled', false).text(t('search', 'Search'));
+				$btn.prop('disabled', false).html('<i class="fa fa-search"></i> <span>' + t('search', 'Search') + '</span>');
 				if (resp && resp.status && resp.content) {ldelim}
 					renderResults(resp.content);
 				{rdelim}
 			{rdelim},
 			error: function() {ldelim}
-				$btn.prop('disabled', false).text(t('search', 'Search'));
+				$btn.prop('disabled', false).html('<i class="fa fa-search"></i> <span>' + t('search', 'Search') + '</span>');
 			{rdelim}
 		{rdelim});
 	{rdelim}
@@ -259,10 +266,10 @@
 		$.each(list, function(idx, item) {ldelim}
 			var tr = $('<tr data-submission-id="' + item.submission_id + '"></tr>');
 			tr.append('<td><strong>#' + item.submission_id + '</strong></td>');
-			tr.append('<td><a href="javascript:void(0);" class="etm-submission-link" data-submission-id="' + item.submission_id + '" style="color: #2563eb; font-weight: 600; text-decoration: none; cursor: pointer;">' + $('<div>').text(item.title).html() + '</a></td>');
+			tr.append('<td><a href="javascript:void(0);" class="etm-submission-link" data-submission-id="' + item.submission_id + '">' + $('<div>').text(item.title).html() + '</a></td>');
 			tr.append('<td><span class="etm-stage-badge">' + $('<div>').text(item.stage_name).html() + '</span></td>');
 			tr.append('<td>' + (item.date_submitted || '-') + '</td>');
-			tr.append('<td style="text-align: right;"><button type="button" class="pkp_button pkp_button_primary etm-open-btn" data-submission-id="' + item.submission_id + '" style="cursor: pointer;">{translate key="plugins.generic.editorialTimelineManager.manage"}</button></td>');
+			tr.append('<td style="text-align: right;"><button type="button" class="pkp_button pkp_button_primary etm-open-btn" data-submission-id="' + item.submission_id + '"><i class="fa fa-pencil"></i> <span>' + t('manage', 'Manage') + '</span></button></td>');
 			$tbody.append(tr);
 		{rdelim});
 	{rdelim}

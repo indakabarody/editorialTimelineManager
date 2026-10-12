@@ -70,7 +70,7 @@ Until now, editors had to manually execute raw SQL queries via phpMyAdmin to fix
 
 - **Safety & Atomic Database Transactions**:
   - All database writes are executed inside atomic transactions (`Capsule::connection()->transaction(...)`).
-  - Strict role authorization (Journal Managers, Sub-Editors, and Site Administrators).
+  - Strict role authorization (restricted exclusively to Journal Managers and Site Administrators).
 
 ---
 

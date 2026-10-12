@@ -6,6 +6,7 @@
  *
  * Tab injected into workflow.tpl tabs container.
  *}
+{if $editorialTimelineIsAuthorized}
 <tab id="editorialTimelineTab" label="{translate key="plugins.generic.editorialTimelineManager.tabTitle"}">
 	<div id="editorialTimelineTabContainer" class="editorial-timeline-tab-container" data-submission-id="{$editorialTimelineSubmissionId}" data-url="{$editorialTimelineUrl}">
 		<div class="editorial-timeline-loading">
@@ -19,6 +20,7 @@
 (function($) {ldelim}
 	window.EditorialTimelineLocales = window.EditorialTimelineLocales || {};
 	$.extend(window.EditorialTimelineLocales, {ldelim}
+		displayName: '{translate key="plugins.generic.editorialTimelineManager.displayName"}',
 		loadingSubmission: '{translate key="plugins.generic.editorialTimelineManager.loadingSubmission"}',
 		loadingDetails: '{translate key="plugins.generic.editorialTimelineManager.loadingDetails"}',
 		loadingList: '{translate key="plugins.generic.editorialTimelineManager.loadingList"}',
@@ -39,10 +41,29 @@
 		dateCopiedSuccess: '{translate key="plugins.generic.editorialTimelineManager.dateCopiedSuccess"}',
 		reviewAlignedSuccess: '{translate key="plugins.generic.editorialTimelineManager.reviewAlignedSuccess"}',
 		specifyOffsetPrompt: '{translate key="plugins.generic.editorialTimelineManager.specifyOffsetPrompt"}',
-		sqlCopied: '{translate key="plugins.generic.editorialTimelineManager.sqlCopied"}',
 		appliedFilesToForm: '{translate key="plugins.generic.editorialTimelineManager.appliedFilesToForm"}',
 		shiftedToForm: '{translate key="plugins.generic.editorialTimelineManager.shiftedToForm"}',
-		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}'
+		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}',
+		save: '{translate key="plugins.generic.editorialTimelineManager.save"}',
+		delete: '{translate key="plugins.generic.editorialTimelineManager.delete"}',
+		activityLogUpdated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successUpdated"}',
+		activityLogDeleted: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successDeleted"}',
+		activityLogCreated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successCreated"}',
+		confirmDeleteLog: '{translate key="plugins.generic.editorialTimelineManager.activityLog.confirmDelete"}',
+		confirmCleanPluginLogs: '{translate key="plugins.generic.editorialTimelineManager.activityLog.confirmCleanPluginLogs"}',
+		fillRequiredFields: '{translate key="plugins.generic.editorialTimelineManager.activityLog.fillRequiredFields"}',
+		networkError: '{translate key="plugins.generic.editorialTimelineManager.error.network"}',
+		serverError: '{translate key="plugins.generic.editorialTimelineManager.error.server"}',
+		shiftError: '{translate key="plugins.generic.editorialTimelineManager.error.shift"}',
+		updateFilesError: '{translate key="plugins.generic.editorialTimelineManager.error.updateFiles"}',
+		updateReviewError: '{translate key="plugins.generic.editorialTimelineManager.error.updateReview"}',
+		createLogError: '{translate key="plugins.generic.editorialTimelineManager.error.createLog"}',
+		updateLogError: '{translate key="plugins.generic.editorialTimelineManager.error.updateLog"}',
+		deleteLogError: '{translate key="plugins.generic.editorialTimelineManager.error.deleteLog"}',
+		cleanLogsError: '{translate key="plugins.generic.editorialTimelineManager.error.cleanLogs"}',
+		logsCleanedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.pluginLogsCleaned"}',
+		reviewUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.reviewerUpdated"}'
 	{rdelim});
 {rdelim})(jQuery);
 </script>
+{/if}

@@ -5,6 +5,7 @@
  * Distributed under the GNU GPL v3. For full terms see the file LICENSE.
  *
  * Comprehensive Editorial Timeline Manager modal and page view.
+ * Aligned with PKP OJS 3.3 standards and native design system.
  *}
 <link rel="stylesheet" href="{$pluginUrl}/css/editorialTimeline.css" type="text/css" />
 
@@ -14,30 +15,45 @@
 	<header class="etm-header">
 		<div class="etm-header-info">
 			<div class="etm-header-badges">
-				<span class="etm-badge etm-badge-primary">ID: #{$submissionId}</span>
-				<span class="etm-badge etm-badge-info">{$timeline.submission.stage_name|escape}</span>
+				<span class="etm-badge etm-badge-primary">
+					<i class="fa fa-hashtag"></i> {$submissionId}
+				</span>
+				<span class="etm-badge etm-badge-info">
+					<i class="fa fa-folder-open-o"></i> {$timeline.submission.stage_name|escape}
+				</span>
 				{if $timeline.submission.status == 3}
-					<span class="etm-badge etm-badge-success">{translate key="plugins.generic.editorialTimelineManager.status.published"}</span>
+					<span class="etm-badge etm-badge-success">
+						<i class="fa fa-check-circle"></i> {translate key="plugins.generic.editorialTimelineManager.status.published"}
+					</span>
 				{elseif $timeline.submission.status == 1}
-					<span class="etm-badge etm-badge-warning">{translate key="plugins.generic.editorialTimelineManager.status.queued"}</span>
+					<span class="etm-badge etm-badge-warning">
+						<i class="fa fa-clock-o"></i> {translate key="plugins.generic.editorialTimelineManager.status.queued"}
+					</span>
 				{else}
-					<span class="etm-badge etm-badge-secondary">{translate key="plugins.generic.editorialTimelineManager.status.archived"}</span>
+					<span class="etm-badge etm-badge-secondary">
+						<i class="fa fa-archive"></i> {translate key="plugins.generic.editorialTimelineManager.status.archived"}
+					</span>
 				{/if}
 			</div>
 			<h2 class="etm-title">{$timeline.submission.title|escape}</h2>
 		</div>
 
 		<div class="etm-header-actions">
-			<button type="button" class="pkp_button etm-btn-back-picker" id="etmBackToPickerBtn_{$submissionId}" style="cursor: pointer;" title="{translate key="plugins.generic.editorialTimelineManager.backToPicker"}">
-				{translate key="plugins.generic.editorialTimelineManager.backToPicker"}
+			<button type="button" class="pkp_button etm-btn-back-picker" id="etmBackToPickerBtn_{$submissionId}" title="{translate key="plugins.generic.editorialTimelineManager.backToPicker"}">
+				<i class="fa fa-arrow-left"></i>
+				<span>{translate key="plugins.generic.editorialTimelineManager.backToPicker"}</span>
 			</button>
-			<a href="{url router=$smarty.const.ROUTE_PAGE page="workflow" op="access" path=$submissionId}" target="_blank" class="pkp_button" style="text-decoration: none;" title="{translate key="plugins.generic.editorialTimelineManager.stage.stage"}">
-				{translate key="plugins.generic.editorialTimelineManager.stage.stage"}
+			<a href="{url router=$smarty.const.ROUTE_PAGE page="workflow" op="access" path=$submissionId}" target="_blank" class="pkp_button" title="{translate key="plugins.generic.editorialTimelineManager.stage.stage"}">
+				<i class="fa fa-external-link"></i>
+				<span>{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</span>
 			</a>
 			<button type="button" class="pkp_button etm-btn-shift" id="etmTriggerShiftModalBtn_{$submissionId}">
-				{translate key="plugins.generic.editorialTimelineManager.shiftTimeline"}
+				<i class="fa fa-calendar"></i>
+				<span>{translate key="plugins.generic.editorialTimelineManager.shiftTimeline"}</span>
 			</button>
+
 			<button type="button" class="pkp_button pkp_button_primary etm-btn-save-primary" id="etmSaveBtn_{$submissionId}">
+				<i class="fa fa-check"></i>
 				<span class="etm-btn-text">{translate key="plugins.generic.editorialTimelineManager.saveToDbDirectly"}</span>
 				<span class="etm-spinner-inline" style="display:none;"></span>
 			</button>
@@ -54,26 +70,32 @@
 	<!-- Navigation Tabs -->
 	<nav class="etm-nav-tabs" role="tablist">
 		<button type="button" class="etm-tab-link active" data-tab="tabOverview_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.overview"}
+			<i class="fa fa-info-circle"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.overview"}</span>
 		</button>
 		<button type="button" class="etm-tab-link" data-tab="tabFiles_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.files"}
+			<i class="fa fa-files-o"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.files"}</span>
 			<span class="etm-tab-count" id="etmFilesCount_{$submissionId}">{count($timeline.files)}</span>
 		</button>
 		<button type="button" class="etm-tab-link" data-tab="tabReviews_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.reviews"}
+			<i class="fa fa-user-circle-o"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.reviews"}</span>
 			<span class="etm-tab-count">{count($timeline.reviews)}</span>
 		</button>
 		<button type="button" class="etm-tab-link" data-tab="tabDecisions_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.decisions"}
+			<i class="fa fa-gavel"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.decisions"}</span>
 			<span class="etm-tab-count">{count($timeline.decisions)}</span>
 		</button>
 		<button type="button" class="etm-tab-link" data-tab="tabDiscussions_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.discussions"}
+			<i class="fa fa-comments-o"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.discussions"}</span>
 			<span class="etm-tab-count">{count($timeline.discussions)}</span>
 		</button>
 		<button type="button" class="etm-tab-link" data-tab="tabActivityLog_{$submissionId}">
-			{translate key="plugins.generic.editorialTimelineManager.tab.activityLog"}
+			<i class="fa fa-history"></i>
+			<span>{translate key="plugins.generic.editorialTimelineManager.tab.activityLog"}</span>
 			<span class="etm-tab-count" id="etmActivityLogCount_{$submissionId}">{count($timeline.activity_logs)}</span>
 		</button>
 	</nav>
@@ -92,7 +114,7 @@
 				<!-- Submission Core Timestamps -->
 				<div class="etm-card">
 					<div class="etm-card-header">
-						<h3>{translate key="plugins.generic.editorialTimelineManager.coreSubmissionDates"}</h3>
+						<h3><i class="fa fa-calendar-check-o"></i> {translate key="plugins.generic.editorialTimelineManager.coreSubmissionDates"}</h3>
 					</div>
 					<div class="etm-card-body">
 						<div class="etm-form-field">
@@ -112,7 +134,7 @@
 						<div class="etm-form-field">
 							<label>{translate key="plugins.generic.editorialTimelineManager.lastModified"}</label>
 							<div class="etm-readonly-val">
-								{EditorialTimelineHelper::formatDisplayDate($timeline.submission.last_modified)}
+								<i class="fa fa-clock-o"></i> {EditorialTimelineHelper::formatDisplayDate($timeline.submission.last_modified)}
 							</div>
 						</div>
 					</div>
@@ -121,22 +143,26 @@
 				<!-- Publication Dates -->
 				<div class="etm-card">
 					<div class="etm-card-header">
-						<h3>{translate key="plugins.generic.editorialTimelineManager.publication"}</h3>
+						<h3><i class="fa fa-book"></i> {translate key="plugins.generic.editorialTimelineManager.publication"}</h3>
 					</div>
 					<div class="etm-card-body">
 						{if $timeline.publications && count($timeline.publications) > 0}
 							{foreach from=$timeline.publications item=pub}
 								<div class="etm-pub-entry">
-									<div class="etm-pub-header">
+									<div class="etm-pub-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
 										<strong>{translate key="plugins.generic.editorialTimelineManager.publicationVersion"} {$pub.version}</strong>
 										{if $pub.status == 3}
-											<span class="etm-badge etm-badge-success">{translate key="plugins.generic.editorialTimelineManager.status.published"}</span>
+											<span class="etm-badge etm-badge-success">
+												<i class="fa fa-check-circle"></i> {translate key="plugins.generic.editorialTimelineManager.status.published"}
+											</span>
 										{else}
-											<span class="etm-badge etm-badge-warning">{translate key="plugins.generic.editorialTimelineManager.status.unpublished"}</span>
+											<span class="etm-badge etm-badge-warning">
+												<i class="fa fa-clock-o"></i> {translate key="plugins.generic.editorialTimelineManager.status.unpublished"}
+											</span>
 										{/if}
 									</div>
 
-									<div class="etm-form-field" style="margin-top: 8px;">
+									<div class="etm-form-field">
 										<label>
 											{translate key="plugins.generic.editorialTimelineManager.published"} (<code>publications.date_published</code>)
 										</label>
@@ -150,7 +176,7 @@
 								</div>
 							{/foreach}
 						{else}
-							<p class="etm-empty-note">{translate key="plugins.generic.editorialTimelineManager.noPublications"}</p>
+							<p class="etm-empty-card">{translate key="plugins.generic.editorialTimelineManager.noPublications"}</p>
 						{/if}
 					</div>
 				</div>
@@ -160,10 +186,10 @@
 			<!-- Batch Shift Helper Card -->
 			<div class="etm-card etm-shift-banner-card">
 				<div class="etm-card-header">
-					<h3>{translate key="plugins.generic.editorialTimelineManager.quickBatchShift"}</h3>
+					<h3><i class="fa fa-fast-forward"></i> {translate key="plugins.generic.editorialTimelineManager.quickBatchShift"}</h3>
 				</div>
 				<div class="etm-card-body">
-					<p>{translate key="plugins.generic.editorialTimelineManager.quickBatchShiftDesc"}</p>
+					<p style="margin-top: 0; color: #475569;">{translate key="plugins.generic.editorialTimelineManager.quickBatchShiftDesc"}</p>
 					<div class="etm-shift-controls">
 						<div class="etm-shift-input-box">
 							<label for="etmQuickShiftDays_{$submissionId}">{translate key="plugins.generic.editorialTimelineManager.daysOffset"}:</label>
@@ -187,8 +213,9 @@
 							<label><input type="checkbox" id="etmShiftOptPublications_{$submissionId}" /> {translate key="plugins.generic.editorialTimelineManager.published"}</label>
 						</div>
 
-						<button type="button" class="pkp_button etm-btn-apply-shift" id="etmApplyQuickShiftBtn_{$submissionId}">
-							{translate key="plugins.generic.editorialTimelineManager.applyShiftToForm"}
+						<button type="button" class="pkp_button pkp_button_primary etm-btn-apply-shift" id="etmApplyQuickShiftBtn_{$submissionId}">
+							<i class="fa fa-magic"></i>
+							<span>{translate key="plugins.generic.editorialTimelineManager.applyShiftToForm"}</span>
 						</button>
 					</div>
 				</div>
@@ -203,10 +230,10 @@
 			<!-- Bulk Stage Setter Card -->
 			<div class="etm-card etm-bulk-card">
 				<div class="etm-card-header">
-					<h3>{translate key="plugins.generic.editorialTimelineManager.bulkStageDateSetter"}</h3>
+					<h3><i class="fa fa-sliders"></i> {translate key="plugins.generic.editorialTimelineManager.bulkStageDateSetter"}</h3>
 				</div>
 				<div class="etm-card-body">
-					<p>{translate key="plugins.generic.editorialTimelineManager.bulkStageDesc"}</p>
+					<p style="margin-top: 0; color: #475569;">{translate key="plugins.generic.editorialTimelineManager.bulkStageDesc"}</p>
 					<div class="etm-bulk-bar">
 						<div class="etm-field-inline">
 							<label for="etmBulkStageSelect_{$submissionId}">{translate key="plugins.generic.editorialTimelineManager.targetStage"}:</label>
@@ -225,8 +252,12 @@
 
 						<div class="etm-field-inline">
 							<label for="etmBulkDateTime_{$submissionId}">{translate key="plugins.generic.editorialTimelineManager.targetDate"}:</label>
-							<input type="datetime-local" id="etmBulkDateTime_{$submissionId}" class="etm-input etm-datetime" />
-							<button type="button" class="pkp_button etm-btn-helper" id="etmSetBulkNow_{$submissionId}">{translate key="plugins.generic.editorialTimelineManager.now"}</button>
+							<div style="display: flex; gap: 4px;">
+								<input type="datetime-local" id="etmBulkDateTime_{$submissionId}" class="etm-input etm-datetime" />
+								<button type="button" class="pkp_button etm-btn-helper" id="etmSetBulkNow_{$submissionId}">
+									<i class="fa fa-clock-o"></i> {translate key="plugins.generic.editorialTimelineManager.now"}
+								</button>
+							</div>
 						</div>
 
 						<div class="etm-field-inline etm-checkbox-inline">
@@ -238,10 +269,10 @@
 
 						<div class="etm-bulk-btn-group">
 							<button type="button" class="pkp_button pkp_button_primary etm-btn-direct-update" id="etmDirectUpdateFilesBtn_{$submissionId}">
-								{translate key="plugins.generic.editorialTimelineManager.updateDbDirectly1Click"}
+								<i class="fa fa-bolt"></i> <span>{translate key="plugins.generic.editorialTimelineManager.updateDbDirectly1Click"}</span>
 							</button>
 							<button type="button" class="pkp_button etm-btn-apply-bulk" id="etmApplyBulkFilesBtn_{$submissionId}">
-								{translate key="plugins.generic.editorialTimelineManager.applyToFormOnly"}
+								<i class="fa fa-pencil-square-o"></i> <span>{translate key="plugins.generic.editorialTimelineManager.applyToFormOnly"}</span>
 							</button>
 						</div>
 					</div>
@@ -250,7 +281,7 @@
 
 			<!-- Filter Bar -->
 			<div class="etm-filter-bar">
-				<span class="etm-filter-label">{translate key="plugins.generic.editorialTimelineManager.filter"}:</span>
+				<span class="etm-filter-label"><i class="fa fa-filter"></i> {translate key="plugins.generic.editorialTimelineManager.filter"}:</span>
 				<button type="button" class="etm-filter-chip active" data-filter="all">{translate key="plugins.generic.editorialTimelineManager.all"} ({count($timeline.files)})</button>
 				{foreach from=$timeline.stage_counts key=stageId item=cnt}
 					<button type="button" class="etm-filter-chip" data-filter="stage-{$stageId}">
@@ -264,7 +295,7 @@
 				<table class="etm-table etm-files-table" id="etmFilesTable_{$submissionId}">
 					<thead>
 						<tr>
-							<th style="width: 80px;">ID</th>
+							<th style="width: 80px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
 							<th>{translate key="plugins.generic.editorialTimelineManager.fileName"}</th>
 							<th style="width: 140px;">{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
 							<th style="width: 130px;">{translate key="plugins.generic.editorialTimelineManager.uploader"}</th>
@@ -276,16 +307,20 @@
 					<tbody id="etmFilesTbody_{$submissionId}">
 						{if $timeline.files && count($timeline.files) > 0}
 							{foreach from=$timeline.files item=file}
-								<tr class="etm-file-row etm-file-stage-{$file.file_stage}" data-file-id="{$file.submission_file_id}" data-stage="{$file.file_stage}">
+								<tr class="etm-file-row etm-file-stage-{$file.file_stage} stage-{$file.file_stage}" data-file-id="{$file.submission_file_id}" data-stage="{$file.file_stage}">
 									<td>
 										<strong class="etm-file-id">#{$file.submission_file_id}</strong>
 									</td>
 									<td>
 										<div class="etm-filename-box">
-											<span class="etm-filename-title">{$file.filename|escape}</span>
-											<span class="etm-genre-tag">{$file.genre_name|escape}</span>
+											<span class="etm-filename-title" style="font-weight: 600;">{$file.filename|escape}</span>
+											<span class="etm-genre-tag" style="display: block; font-size: 11px; color: #64748b; margin-top: 2px;">
+												<i class="fa fa-tag"></i> {$file.genre_name|escape}
+											</span>
 											{if $file.reviewer_info}
-												<span class="etm-reviewer-tag">{$file.reviewer_info.reviewer_name|escape}</span>
+												<span class="etm-reviewer-tag" style="display: inline-block; font-size: 11px; color: #0284c7; margin-top: 2px;">
+													<i class="fa fa-user"></i> {$file.reviewer_info.reviewer_name|escape}
+												</span>
 											{/if}
 										</div>
 									</td>
@@ -295,7 +330,7 @@
 										</span>
 									</td>
 									<td>
-										<span class="etm-uploader-name">{$file.uploader_username|escape}</span>
+										<span class="etm-uploader-name"><i class="fa fa-user-o"></i> {$file.uploader_username|escape}</span>
 									</td>
 									<td>
 										<input
@@ -321,14 +356,20 @@
 											data-created="{EditorialTimelineHelper::toHtmlDatetime($file.created_at)}"
 											data-stage="{$file.file_stage}"
 										>
-											{translate key="plugins.generic.editorialTimelineManager.copy"}
+											<i class="fa fa-clone"></i>
+											<span>{translate key="plugins.generic.editorialTimelineManager.copy"}</span>
 										</button>
 									</td>
 								</tr>
 							{/foreach}
+							<tr class="etm-no-filtered-files" style="display: none;">
+								<td colspan="7" class="etm-empty-card" style="text-align: center; padding: 25px; color: #64748b;">
+									<i class="fa fa-filter"></i> {translate key="plugins.generic.editorialTimelineManager.noFilesFound"}
+								</td>
+							</tr>
 						{else}
 							<tr>
-								<td colspan="7" class="etm-empty-row">
+								<td colspan="7" class="etm-empty-card">
 									{translate key="plugins.generic.editorialTimelineManager.noFilesFound"}
 								</td>
 							</tr>
@@ -348,7 +389,7 @@
 						<div class="etm-card etm-review-card" id="etmReviewCard_{$rev.review_id}" data-review-id="{$rev.review_id}">
 							<div class="etm-card-header etm-review-header">
 								<div class="etm-reviewer-title">
-									<h4>{$rev.reviewer_name|escape}</h4>
+									<h4><i class="fa fa-user"></i> {$rev.reviewer_name|escape}</h4>
 									<span class="etm-badge etm-badge-secondary">{translate key="plugins.generic.editorialTimelineManager.round"} {$rev.round|default:1}</span>
 									{if $rev.recommendation_name}
 										<span class="etm-badge etm-badge-info">{$rev.recommendation_name|escape}</span>
@@ -362,21 +403,21 @@
 										data-review-id="{$rev.review_id}"
 										title="{translate key="plugins.generic.editorialTimelineManager.autoAlignChronologyDesc"}"
 									>
-										{translate key="plugins.generic.editorialTimelineManager.autoAlignChronology"}
+										<i class="fa fa-magic"></i> <span>{translate key="plugins.generic.editorialTimelineManager.autoAlignChronology"}</span>
 									</button>
 									<button
 										type="button"
 										class="pkp_button pkp_button_primary etm-direct-review-btn"
 										data-review-id="{$rev.review_id}"
 									>
-										{translate key="plugins.generic.editorialTimelineManager.saveReviewToDbDirectly"}
+										<i class="fa fa-bolt"></i> <span>{translate key="plugins.generic.editorialTimelineManager.saveReviewToDbDirectly"}</span>
 									</button>
 								</div>
 							</div>
 
 							<!-- Chronology Warnings Banner -->
 							<div class="etm-chronology-warning" id="etmChronoWarning_{$rev.review_id}" {if !$rev.chronology_warnings || count($rev.chronology_warnings) == 0}style="display:none;"{/if}>
-								<span class="etm-warning-icon">!</span>
+								<span class="etm-warning-icon"><i class="fa fa-exclamation-triangle"></i></span>
 								<div class="etm-warning-list">
 									{if $rev.chronology_warnings}
 										{foreach from=$rev.chronology_warnings item=w}
@@ -458,7 +499,7 @@
 				</div>
 			{else}
 				<div class="etm-empty-card">
-					<p>{translate key="plugins.generic.editorialTimelineManager.noReviewsFound"}</p>
+					<p><i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.noReviewsFound"}</p>
 				</div>
 			{/if}
 		</section>
@@ -472,7 +513,7 @@
 					<table class="etm-table etm-decisions-table">
 						<thead>
 							<tr>
-								<th style="width: 80px;">ID</th>
+								<th style="width: 80px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
 								<th>{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
 								<th>{translate key="plugins.generic.editorialTimelineManager.round"}</th>
 								<th>{translate key="plugins.generic.editorialTimelineManager.decision.decision"}</th>
@@ -488,10 +529,10 @@
 									<td>{$dec.round|default:1}</td>
 									<td>
 										<span class="etm-badge etm-badge-primary">
-											{$dec.decision_name|escape}
+											<i class="fa fa-check"></i> {$dec.decision_name|escape}
 										</span>
 									</td>
-									<td>{$dec.editor_name|escape}</td>
+									<td><i class="fa fa-user-o"></i> {$dec.editor_name|escape}</td>
 									<td>
 										<input
 											type="datetime-local"
@@ -507,7 +548,7 @@
 				</div>
 			{else}
 				<div class="etm-empty-card">
-					<p>{translate key="plugins.generic.editorialTimelineManager.noDecisionsFound"}</p>
+					<p><i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.noDecisionsFound"}</p>
 				</div>
 			{/if}
 		</section>
@@ -522,7 +563,7 @@
 						<div class="etm-card etm-discussion-card">
 							<div class="etm-card-header">
 								<div class="etm-disc-title">
-									<h4>{$disc.title|escape}</h4>
+									<h4><i class="fa fa-commenting-o"></i> {$disc.title|escape}</h4>
 									<span class="etm-stage-badge">{$disc.stage_name|escape}</span>
 								</div>
 
@@ -543,7 +584,7 @@
 										{foreach from=$disc.notes item=note}
 											<div class="etm-note-item">
 												<div class="etm-note-header">
-													<strong>{$note.author_name|escape}</strong>
+													<strong><i class="fa fa-user"></i> {$note.author_name|escape}</strong>
 													{if $note.title}<em>({$note.title|escape})</em>{/if}
 												</div>
 												<div class="etm-note-snippet">
@@ -570,7 +611,7 @@
 				</div>
 			{else}
 				<div class="etm-empty-card">
-					<p>{translate key="plugins.generic.editorialTimelineManager.noDiscussionsFound"}</p>
+					<p><i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.noDiscussionsFound"}</p>
 				</div>
 			{/if}
 		</section>
@@ -581,17 +622,17 @@
 		<section class="etm-tab-panel" id="tabActivityLog_{$submissionId}">
 
 			<div class="etm-card">
-				<div class="etm-card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+				<div class="etm-card-header">
 					<div>
-						<h3 style="margin: 0;">{translate key="plugins.generic.editorialTimelineManager.activityLog.title"}</h3>
+						<h3><i class="fa fa-history"></i> {translate key="plugins.generic.editorialTimelineManager.activityLog.title"}</h3>
 						<small class="etm-help-text">{translate key="plugins.generic.editorialTimelineManager.activityLog.desc"}</small>
 					</div>
 					<div style="display: flex; gap: 8px; align-items: center;">
-						<button type="button" class="pkp_button pkp_button_primary" id="etmToggleAddLogBtn_{$submissionId}">
-							+ {translate key="plugins.generic.editorialTimelineManager.activityLog.addEntry"}
+						<button type="button" class="pkp_button pkp_button_primary etm-btn-add-log" id="etmToggleAddLogBtn_{$submissionId}">
+							<i class="fa fa-plus"></i> <span>{translate key="plugins.generic.editorialTimelineManager.activityLog.addEntry"}</span>
 						</button>
 						<button type="button" class="pkp_button etm-btn-clean-logs" id="etmCleanPluginLogsBtn_{$submissionId}" title="{translate key="plugins.generic.editorialTimelineManager.activityLog.cleanPluginLogs"}">
-							{translate key="plugins.generic.editorialTimelineManager.activityLog.cleanPluginLogs"}
+							<i class="fa fa-eraser"></i> <span>{translate key="plugins.generic.editorialTimelineManager.activityLog.cleanPluginLogs"}</span>
 						</button>
 					</div>
 				</div>
@@ -623,7 +664,9 @@
 
 					<!-- Simple Add Log Entry Form -->
 					<div class="etm-new-log-form" id="etmNewLogForm_{$submissionId}" style="display: none; background: #f8fafc; border: 1px solid var(--etm-border); border-radius: 6px; padding: 14px; margin-bottom: 16px;">
-						<h4 style="margin: 0 0 10px 0; font-size: 0.95rem; color: var(--etm-primary);">{translate key="plugins.generic.editorialTimelineManager.activityLog.addEntry"}</h4>
+						<h4 style="margin: 0 0 10px 0; font-size: 13px; font-weight: 700; color: var(--etm-primary);">
+							<i class="fa fa-plus-circle"></i> {translate key="plugins.generic.editorialTimelineManager.activityLog.addEntry"}
+						</h4>
 						<div class="etm-grid-2col" style="gap: 12px;">
 							<div class="etm-form-field">
 								<label for="etmNewLogDate_{$submissionId}">{translate key="plugins.generic.editorialTimelineManager.activityLog.dateLogged"}</label>
@@ -643,11 +686,11 @@
 							<textarea id="etmNewLogMessage_{$submissionId}" class="etm-input" rows="2" placeholder="{translate key="plugins.generic.editorialTimelineManager.activityLog.event"}..."></textarea>
 						</div>
 						<div style="margin-top: 12px; display: flex; gap: 8px;">
-							<button type="button" class="pkp_button pkp_button_primary" id="etmCreateLogBtn_{$submissionId}">
-								{translate key="plugins.generic.editorialTimelineManager.activityLog.saveEntry"}
+							<button type="button" class="pkp_button pkp_button_primary etm-btn-create-log" id="etmCreateLogBtn_{$submissionId}">
+								<i class="fa fa-check"></i> <span>{translate key="plugins.generic.editorialTimelineManager.activityLog.saveEntry"}</span>
 							</button>
-							<button type="button" class="pkp_button" id="etmCancelAddLogBtn_{$submissionId}">
-								{translate key="plugins.generic.editorialTimelineManager.cancel"}
+							<button type="button" class="pkp_button etm-btn-cancel-log" id="etmCancelAddLogBtn_{$submissionId}">
+								<span>{translate key="plugins.generic.editorialTimelineManager.cancel"}</span>
 							</button>
 						</div>
 					</div>
@@ -657,7 +700,7 @@
 						<table class="etm-table etm-log-table" id="etmLogTable_{$submissionId}">
 							<thead>
 								<tr>
-									<th style="width: 70px;">ID</th>
+									<th style="width: 70px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
 									<th style="width: 200px;">{translate key="plugins.generic.editorialTimelineManager.activityLog.dateLogged"}</th>
 									<th style="width: 220px;">{translate key="plugins.generic.editorialTimelineManager.activityLog.user"}</th>
 									<th>{translate key="plugins.generic.editorialTimelineManager.activityLog.event"}</th>
@@ -670,7 +713,9 @@
 										<td>
 											<strong class="etm-log-id">#{$log.log_id}</strong>
 											{if $log.is_plugin_log}
-												<span class="etm-badge etm-badge-warning" style="margin-top: 4px; display: inline-block;">{translate key="plugins.generic.editorialTimelineManager.activityLog.pluginLogBadge"}</span>
+												<span class="etm-badge etm-badge-warning" style="margin-top: 4px; display: inline-block;">
+													{translate key="plugins.generic.editorialTimelineManager.activityLog.pluginLogBadge"}
+												</span>
 											{/if}
 										</td>
 										<td>
@@ -712,7 +757,7 @@
 													title="{translate key="plugins.generic.editorialTimelineManager.save"}"
 													data-log-id="{$log.log_id}"
 												>
-													{translate key="plugins.generic.editorialTimelineManager.save"}
+													<i class="fa fa-save"></i> <span>{translate key="plugins.generic.editorialTimelineManager.save"}</span>
 												</button>
 												<button
 													type="button"
@@ -720,7 +765,7 @@
 													title="{translate key="plugins.generic.editorialTimelineManager.delete"}"
 													data-log-id="{$log.log_id}"
 												>
-													{translate key="plugins.generic.editorialTimelineManager.delete"}
+													<i class="fa fa-trash-o"></i> <span>{translate key="plugins.generic.editorialTimelineManager.delete"}</span>
 												</button>
 											</div>
 										</td>
@@ -729,7 +774,7 @@
 							</tbody>
 						</table>
 						<div class="etm-empty-card" id="etmNoLogsCard_{$submissionId}" style="{if $timeline.activity_logs && count($timeline.activity_logs) > 0}display: none;{/if}">
-							<p>{translate key="plugins.generic.editorialTimelineManager.activityLog.noLogsFound"}</p>
+							<p><i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.activityLog.noLogsFound"}</p>
 						</div>
 					</div>
 				</div>
@@ -744,6 +789,7 @@
 (function($) {ldelim}
 	window.EditorialTimelineLocales = window.EditorialTimelineLocales || {};
 	$.extend(window.EditorialTimelineLocales, {ldelim}
+		displayName: '{translate key="plugins.generic.editorialTimelineManager.displayName"}',
 		loadingSubmission: '{translate key="plugins.generic.editorialTimelineManager.loadingSubmission"}',
 		loadingDetails: '{translate key="plugins.generic.editorialTimelineManager.loadingDetails"}',
 		loadingList: '{translate key="plugins.generic.editorialTimelineManager.loadingList"}',
@@ -764,17 +810,28 @@
 		dateCopiedSuccess: '{translate key="plugins.generic.editorialTimelineManager.dateCopiedSuccess"}',
 		reviewAlignedSuccess: '{translate key="plugins.generic.editorialTimelineManager.reviewAlignedSuccess"}',
 		specifyOffsetPrompt: '{translate key="plugins.generic.editorialTimelineManager.specifyOffsetPrompt"}',
-		sqlCopied: '{translate key="plugins.generic.editorialTimelineManager.sqlCopied"}',
 		appliedFilesToForm: '{translate key="plugins.generic.editorialTimelineManager.appliedFilesToForm"}',
 		shiftedToForm: '{translate key="plugins.generic.editorialTimelineManager.shiftedToForm"}',
 		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}',
+		save: '{translate key="plugins.generic.editorialTimelineManager.save"}',
+		delete: '{translate key="plugins.generic.editorialTimelineManager.delete"}',
 		activityLogUpdated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successUpdated"}',
 		activityLogDeleted: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successDeleted"}',
 		activityLogCreated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successCreated"}',
 		confirmDeleteLog: '{translate key="plugins.generic.editorialTimelineManager.activityLog.confirmDelete"}',
 		confirmCleanPluginLogs: '{translate key="plugins.generic.editorialTimelineManager.activityLog.confirmCleanPluginLogs"}',
 		fillRequiredFields: '{translate key="plugins.generic.editorialTimelineManager.activityLog.fillRequiredFields"}',
-		networkError: '{translate key="plugins.generic.editorialTimelineManager.errorOccurred"}'
+		networkError: '{translate key="plugins.generic.editorialTimelineManager.error.network"}',
+		serverError: '{translate key="plugins.generic.editorialTimelineManager.error.server"}',
+		shiftError: '{translate key="plugins.generic.editorialTimelineManager.error.shift"}',
+		updateFilesError: '{translate key="plugins.generic.editorialTimelineManager.error.updateFiles"}',
+		updateReviewError: '{translate key="plugins.generic.editorialTimelineManager.error.updateReview"}',
+		createLogError: '{translate key="plugins.generic.editorialTimelineManager.error.createLog"}',
+		updateLogError: '{translate key="plugins.generic.editorialTimelineManager.error.updateLog"}',
+		deleteLogError: '{translate key="plugins.generic.editorialTimelineManager.error.deleteLog"}',
+		cleanLogsError: '{translate key="plugins.generic.editorialTimelineManager.error.cleanLogs"}',
+		logsCleanedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.pluginLogsCleaned"}',
+		reviewUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.reviewerUpdated"}'
 	{rdelim});
 
 	function t(key, fallback, replacements) {ldelim}
@@ -837,8 +894,8 @@
 
 		$target.html(
 			'<div style="text-align: center; padding: 60px 20px;">' +
-				'<div style="display: inline-block; width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #2563eb; border-radius: 50%; animation: etmSpin 0.8s linear infinite;"></div>' +
-				'<p style="margin-top: 15px; color: #64748b; font-size: 14px;">' + t('loadingList', 'Loading submissions list...') + '</p>' +
+				'<div style="display: inline-block; width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #006798; border-radius: 50%; animation: etmSpin 0.8s linear infinite;"></div>' +
+				'<p style="margin-top: 15px; color: #64748b; font-size: 13px;">' + t('loadingList', 'Loading submissions list...') + '</p>' +
 			'</div>'
 		);
 

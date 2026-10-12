@@ -65,6 +65,46 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
     }
 
     /**
+     * Check whether the user is authorized (Site Admin or Journal Manager).
+     *
+     * @param PKPRequest|null $request
+     * @param int|null $contextId
+     * @return bool
+     */
+    public function isUserAuthorized($request = null, $contextId = null)
+    {
+        $this->import('classes.EditorialTimelineHelper');
+        return EditorialTimelineHelper::isUserAuthorizedManagerOrAdmin($request, $contextId);
+    }
+
+    /**
+     * Determine whether the plugin should be hidden from management/plugin grids.
+     * Completely hidden for any user who is not Site Admin or Journal Manager.
+     *
+     * @return bool
+     */
+    public function getHideManagement()
+    {
+        return !$this->isUserAuthorized();
+    }
+
+    /**
+     * @copydoc Plugin::getCanEnable()
+     */
+    public function getCanEnable()
+    {
+        return $this->isUserAuthorized();
+    }
+
+    /**
+     * @copydoc Plugin::getCanDisable()
+     */
+    public function getCanDisable()
+    {
+        return $this->isUserAuthorized();
+    }
+
+    /**
      * Add action links in the plugin settings list.
      *
      * @param PKPRequest $request
@@ -73,11 +113,11 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
      */
     public function getActions($request, $actionArgs)
     {
-        $actions = parent::getActions($request, $actionArgs);
-
-        if (!$this->getEnabled()) {
-            return $actions;
+        if (!$this->getEnabled() || !$this->isUserAuthorized($request)) {
+            return [];
         }
+
+        $actions = parent::getActions($request, $actionArgs);
 
         $dispatcher = $request->getDispatcher();
         import('lib.pkp.classes.linkAction.request.AjaxModal');
@@ -101,6 +141,10 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
      */
     public function manage($args, $request)
     {
+        if (!$this->isUserAuthorized($request)) {
+            return new JSONMessage(false);
+        }
+
         $this->import('pages.EditorialTimelineHandler');
         $handler = new EditorialTimelineHandler();
         $handler->setPlugin($this);
@@ -128,9 +172,6 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
 
             case 'directUpdateReview':
                 return $handler->directUpdateReview($args, $request);
-
-            case 'generateSql':
-                return $handler->generateSql($args, $request);
 
             case 'shiftTimeline':
                 return $handler->shiftTimeline($args, $request);
@@ -163,6 +204,10 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
     {
         $page = $params[0];
         if ($this->getEnabled() && strtolower($page) === 'editorialtimeline') {
+            $request = Application::get()->getRequest();
+            if (!$this->isUserAuthorized($request)) {
+                return false;
+            }
             $this->import('pages.EditorialTimelineHandler');
             define('HANDLER_CLASS', 'EditorialTimelineHandler');
             return true;
@@ -187,18 +232,33 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
             return false;
         }
 
+        $request = Application::get()->getRequest();
+        $contextId = null;
+        if (is_object($submission) && method_exists($submission, 'getContextId')) {
+            $contextId = (int) $submission->getContextId();
+        } elseif (is_array($submission) && isset($submission['contextId'])) {
+            $contextId = (int) $submission['contextId'];
+        } elseif ($request && $request->getContext()) {
+            $contextId = (int) $request->getContext()->getId();
+        }
+
+        if (!$this->isUserAuthorized($request, $contextId)) {
+            return false;
+        }
+
         AppLocale::requireComponents(LOCALE_COMPONENT_PKP_SUBMISSION, LOCALE_COMPONENT_APP_SUBMISSION, LOCALE_COMPONENT_PKP_EDITOR, LOCALE_COMPONENT_APP_EDITOR, LOCALE_COMPONENT_PKP_GRID, LOCALE_COMPONENT_PKP_DEFAULT, LOCALE_COMPONENT_APP_DEFAULT, LOCALE_COMPONENT_PKP_MANAGER, LOCALE_COMPONENT_APP_MANAGER, LOCALE_COMPONENT_PKP_COMMON, LOCALE_COMPONENT_APP_COMMON);
 
-        $request = Application::get()->getRequest();
         $dispatcher = $request->getDispatcher();
+        $submissionId = is_object($submission) && method_exists($submission, 'getId') ? $submission->getId() : (isset($submission['id']) ? $submission['id'] : 0);
 
         $timelineUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'manage', null, [
-            'submissionId' => $submission->getId(),
+            'submissionId' => $submissionId,
         ]);
 
         $smarty->assign([
+            'editorialTimelineIsAuthorized' => true,
             'editorialTimelineUrl' => $timelineUrl,
-            'editorialTimelineSubmissionId' => $submission->getId(),
+            'editorialTimelineSubmissionId' => $submissionId,
             'pluginName' => $this->getName(),
         ]);
 
@@ -220,6 +280,10 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
         $template = $params[1];
 
         $request = Application::get()->getRequest();
+        if (!$this->isUserAuthorized($request)) {
+            return false;
+        }
+
         $baseUrl = $request->getBaseUrl();
 
         $pluginPath = $this->getPluginPath();

@@ -116,29 +116,11 @@ msgstr "Discussion Started"
 msgid "plugins.generic.editorialTimelineManager.noDiscussionsFound"
 msgstr "No stage discussions found for this submission."
 
-msgid "plugins.generic.editorialTimelineManager.generatedSqlScript"
-msgstr "Generated SQL Script"
-
-msgid "plugins.generic.editorialTimelineManager.sqlScriptDesc"
-msgstr "Atomic SQL transaction corresponding to your form inputs. You can execute this directly via phpMyAdmin or review it before saving."
-
-msgid "plugins.generic.editorialTimelineManager.clickRefreshToGenerate"
-msgstr "Click Refresh or switch tabs to generate SQL script preview."
-
-msgid "plugins.generic.editorialTimelineManager.copySql"
-msgstr "Copy SQL"
-
-msgid "plugins.generic.editorialTimelineManager.downloadSql"
-msgstr "Download .sql"
-
 msgid "plugins.generic.editorialTimelineManager.saveChanges"
 msgstr "Save Timeline Changes"
 
 msgid "plugins.generic.editorialTimelineManager.shiftTimeline"
 msgstr "Shift Timeline"
-
-msgid "plugins.generic.editorialTimelineManager.previewSql"
-msgstr "Preview SQL"
 
 msgid "plugins.generic.editorialTimelineManager.tab.overview"
 msgstr "Overview & Dates"
@@ -154,9 +136,6 @@ msgstr "Editorial Decisions"
 
 msgid "plugins.generic.editorialTimelineManager.tab.discussions"
 msgstr "Discussions"
-
-msgid "plugins.generic.editorialTimelineManager.tab.sql"
-msgstr "SQL Preview"
 
 msgid "plugins.generic.editorialTimelineManager.warning.notifiedBeforeAssigned"
 msgstr "Reviewer notified date is earlier than assigned date."
@@ -256,9 +235,6 @@ msgstr "Aligned review assignment chronology in form."
 
 msgid "plugins.generic.editorialTimelineManager.specifyOffsetPrompt"
 msgstr "Please specify a positive or negative day offset to shift."
-
-msgid "plugins.generic.editorialTimelineManager.sqlCopied"
-msgstr "Verification SQL copied to clipboard."
 
 msgid "plugins.generic.editorialTimelineManager.appliedFilesToForm"
 msgstr "Applied date to {$count} file(s) in form inputs. Click \"{$saveBtn}\" to persist."
@@ -568,4 +544,43 @@ msgstr "System Logs"
 
 msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogs"
 msgstr "Timeline Manager Logs"
+
+msgid "plugins.generic.editorialTimelineManager.tableId"
+msgstr "ID"
+
+msgid "plugins.generic.editorialTimelineManager.error.network"
+msgstr "Network or communication error occurred with the server."
+
+msgid "plugins.generic.editorialTimelineManager.error.server"
+msgstr "Server error occurred while processing changes directly in the database."
+
+msgid "plugins.generic.editorialTimelineManager.error.shift"
+msgstr "Failed to calculate shifted timeline."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateFiles"
+msgstr "Database update failed while updating files."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateReview"
+msgstr "Database update failed while updating reviewer."
+
+msgid "plugins.generic.editorialTimelineManager.error.createLog"
+msgstr "Failed to create activity log entry."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateLog"
+msgstr "Failed to update activity log entry."
+
+msgid "plugins.generic.editorialTimelineManager.error.deleteLog"
+msgstr "Failed to delete activity log entry."
+
+msgid "plugins.generic.editorialTimelineManager.error.cleanLogs"
+msgstr "Failed to clean plugin activity logs."
+
+msgid "plugins.generic.editorialTimelineManager.success.pluginLogsCleaned"
+msgstr "Timeline manager logs cleaned successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.success.reviewerUpdated"
+msgstr "Reviewer schedule directly updated in database!"
+
+msgid "plugins.generic.editorialTimelineManager.error.roleUnauthorized"
+msgstr "Access denied. Editorial Timeline Manager is only accessible by Site Administrators and Journal Managers."
 

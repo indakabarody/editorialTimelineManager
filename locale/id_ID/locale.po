@@ -116,29 +116,11 @@ msgstr "Diskusi Dimulai"
 msgid "plugins.generic.editorialTimelineManager.noDiscussionsFound"
 msgstr "Tidak ada diskusi tahapan untuk naskah ini."
 
-msgid "plugins.generic.editorialTimelineManager.generatedSqlScript"
-msgstr "Pratinjau Perintah SQL"
-
-msgid "plugins.generic.editorialTimelineManager.sqlScriptDesc"
-msgstr "Transaksi SQL atomik yang sesuai dengan isian formulir Anda. Anda dapat menjalankannya di phpMyAdmin atau memeriksanya sebelum disimpan."
-
-msgid "plugins.generic.editorialTimelineManager.clickRefreshToGenerate"
-msgstr "Klik Segarkan atau buka tab untuk melihat pratinjau perintah SQL."
-
-msgid "plugins.generic.editorialTimelineManager.copySql"
-msgstr "Salin SQL"
-
-msgid "plugins.generic.editorialTimelineManager.downloadSql"
-msgstr "Unduh .sql"
-
 msgid "plugins.generic.editorialTimelineManager.saveChanges"
 msgstr "Simpan Perubahan Timeline"
 
 msgid "plugins.generic.editorialTimelineManager.shiftTimeline"
 msgstr "Geser Timeline"
-
-msgid "plugins.generic.editorialTimelineManager.previewSql"
-msgstr "Pratinjau SQL"
 
 msgid "plugins.generic.editorialTimelineManager.tab.overview"
 msgstr "Ringkasan & Tanggal Inti"
@@ -154,9 +136,6 @@ msgstr "Keputusan Editor"
 
 msgid "plugins.generic.editorialTimelineManager.tab.discussions"
 msgstr "Diskusi Tahapan"
-
-msgid "plugins.generic.editorialTimelineManager.tab.sql"
-msgstr "Pratinjau SQL"
 
 msgid "plugins.generic.editorialTimelineManager.warning.notifiedBeforeAssigned"
 msgstr "Tanggal pemberitahuan lebih awal dari tanggal penugasan."
@@ -256,9 +235,6 @@ msgstr "Kronologi penugasan reviewer berhasil diratakan dalam formulir."
 
 msgid "plugins.generic.editorialTimelineManager.specifyOffsetPrompt"
 msgstr "Silakan tentukan jumlah hari pergeseran (positif atau negatif)."
-
-msgid "plugins.generic.editorialTimelineManager.sqlCopied"
-msgstr "Perintah SQL verifikasi berhasil disalin."
 
 msgid "plugins.generic.editorialTimelineManager.appliedFilesToForm"
 msgstr "Tanggal diterapkan ke {$count} berkas dalam formulir. Klik \"{$saveBtn}\" untuk menyimpan."
@@ -568,4 +544,43 @@ msgstr "Log Sistem"
 
 msgid "plugins.generic.editorialTimelineManager.activityLog.pluginLogs"
 msgstr "Log Timeline Manager"
+
+msgid "plugins.generic.editorialTimelineManager.tableId"
+msgstr "ID"
+
+msgid "plugins.generic.editorialTimelineManager.error.network"
+msgstr "Terjadi kesalahan jaringan atau komunikasi dengan server."
+
+msgid "plugins.generic.editorialTimelineManager.error.server"
+msgstr "Terjadi kesalahan server saat memproses perubahan langsung ke basis data."
+
+msgid "plugins.generic.editorialTimelineManager.error.shift"
+msgstr "Gagal menghitung pergeseran linimasa."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateFiles"
+msgstr "Pembaruan basis data gagal saat memperbarui berkas."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateReview"
+msgstr "Pembaruan basis data gagal saat memperbarui reviewer."
+
+msgid "plugins.generic.editorialTimelineManager.error.createLog"
+msgstr "Gagal membuat entri log aktivitas."
+
+msgid "plugins.generic.editorialTimelineManager.error.updateLog"
+msgstr "Gagal memperbarui entri log aktivitas."
+
+msgid "plugins.generic.editorialTimelineManager.error.deleteLog"
+msgstr "Gagal menghapus entri log aktivitas."
+
+msgid "plugins.generic.editorialTimelineManager.error.cleanLogs"
+msgstr "Gagal membersihkan log aktivitas plugin."
+
+msgid "plugins.generic.editorialTimelineManager.success.pluginLogsCleaned"
+msgstr "Log timeline manager berhasil dibersihkan!"
+
+msgid "plugins.generic.editorialTimelineManager.success.reviewerUpdated"
+msgstr "Jadwal penelaahan reviewer berhasil diperbarui di basis data!"
+
+msgid "plugins.generic.editorialTimelineManager.error.roleUnauthorized"
+msgstr "Akses ditolak. Editorial Timeline Manager hanya dapat diakses oleh Administrator Situs dan Pengelola Jurnal (Journal Manager)."
 

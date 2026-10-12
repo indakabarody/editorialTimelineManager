@@ -27,7 +27,7 @@ class EditorialTimelineHandler extends Handler
     {
         parent::__construct();
 
-        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR, ROLE_ID_ASSISTANT, ROLE_ID_SITE_ADMIN], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'generateSql', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs']);
+        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs']);
     }
 
     /**
@@ -40,6 +40,10 @@ class EditorialTimelineHandler extends Handler
 
         import('lib.pkp.classes.security.authorization.PKPSiteAccessPolicy');
         $this->addPolicy(new PKPSiteAccessPolicy($request, null, $roleAssignments));
+
+        if (!EditorialTimelineHelper::isUserAuthorizedManagerOrAdmin($request)) {
+            return false;
+        }
 
         return parent::authorize($request, $args, $roleAssignments);
     }
@@ -87,6 +91,18 @@ class EditorialTimelineHandler extends Handler
     }
 
     /**
+     * Check if request is from authorized Site Admin or Journal Manager.
+     *
+     * @param PKPRequest $request
+     * @param int|null $contextId
+     * @return bool
+     */
+    protected function checkAuthorized($request, $contextId = null)
+    {
+        return EditorialTimelineHelper::isUserAuthorizedManagerOrAdmin($request, $contextId);
+    }
+
+    /**
      * Main entry point: show submission picker or timeline manager.
      *
      * @param array $args
@@ -107,6 +123,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function manage($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         AppLocale::requireComponents(LOCALE_COMPONENT_PKP_SUBMISSION, LOCALE_COMPONENT_APP_SUBMISSION, LOCALE_COMPONENT_PKP_EDITOR, LOCALE_COMPONENT_APP_EDITOR, LOCALE_COMPONENT_PKP_GRID, LOCALE_COMPONENT_PKP_DEFAULT, LOCALE_COMPONENT_APP_DEFAULT, LOCALE_COMPONENT_PKP_MANAGER, LOCALE_COMPONENT_APP_MANAGER, LOCALE_COMPONENT_PKP_COMMON, LOCALE_COMPONENT_APP_COMMON);
 
         $context = $request->getContext();
@@ -173,6 +193,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function getTimelineData($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         $context = $request->getContext();
         $submissionId = (int) $request->getUserVar('submissionId');
 
@@ -199,6 +223,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function searchSubmissions($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         $context = $request->getContext();
         $query = (string) $request->getUserVar('query');
 
@@ -217,6 +245,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function saveTimeline($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -249,35 +281,6 @@ class EditorialTimelineHandler extends Handler
     }
 
     /**
-     * AJAX endpoint to generate SQL script preview.
-     *
-     * @param array $args
-     * @param PKPRequest $request
-     * @return JSONMessage
-     */
-    public function generateSql($args, $request)
-    {
-        $submissionId = (int) $request->getUserVar('submissionId');
-        $payloadJson = $request->getUserVar('timelinePayload');
-
-        if (!$submissionId || empty($payloadJson)) {
-            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
-        }
-
-        $payload = json_decode($payloadJson, true);
-        if (!is_array($payload)) {
-            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.invalidJson'));
-        }
-
-        $dao = new EditorialTimelineDAO();
-        $sqlScript = $dao->generateSqlScript($submissionId, $payload);
-
-        return new JSONMessage(true, [
-            'sql' => $sqlScript,
-        ]);
-    }
-
-    /**
      * AJAX endpoint to calculate shifted timeline.
      *
      * @param array $args
@@ -286,6 +289,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function shiftTimeline($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         $context = $request->getContext();
         $submissionId = (int) $request->getUserVar('submissionId');
         $daysOffset = (int) $request->getUserVar('daysOffset');
@@ -316,6 +323,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function directUpdateFiles($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -357,6 +368,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function directUpdateReview($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -393,6 +408,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function directUpdateActivityLog($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -442,6 +461,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function deleteActivityLog($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -476,6 +499,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function createActivityLog($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
@@ -516,6 +543,10 @@ class EditorialTimelineHandler extends Handler
      */
     public function cleanPluginActivityLogs($args, $request)
     {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
         if (!$request->checkCSRF()) {
             return new JSONMessage(false, __('form.csrfInvalid'));
         }
