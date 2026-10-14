@@ -584,3 +584,33 @@ msgstr "Jadwal penelaahan reviewer berhasil diperbarui di basis data!"
 msgid "plugins.generic.editorialTimelineManager.error.roleUnauthorized"
 msgstr "Akses ditolak. Editorial Timeline Manager hanya dapat diakses oleh Administrator Situs dan Pengelola Jurnal (Journal Manager)."
 
+msgid "plugins.generic.editorialTimelineManager.decisionNotificationEmail"
+msgstr "Email Notifikasi ke Penulis (Notifikasi Babak Review)"
+
+msgid "plugins.generic.editorialTimelineManager.syncDecisionNotification"
+msgstr "Sinkronisasi otomatis tanggal email notifikasi dengan tanggal keputusan"
+
+msgid "plugins.generic.editorialTimelineManager.noLinkedEmail"
+msgstr "Tidak ada email notifikasi penulis yang terkait"
+
+msgid "plugins.generic.editorialTimelineManager.saveDecisionToDbDirectly"
+msgstr "Perbarui Keputusan & Notifikasi Langsung di Database"
+
+msgid "plugins.generic.editorialTimelineManager.allDecisionEmails"
+msgstr "Semua Email Notifikasi Keputusan ke Penulis"
+
+msgid "plugins.generic.editorialTimelineManager.dateSent"
+msgstr "Tanggal Dikirim"
+
+msgid "plugins.generic.editorialTimelineManager.subject"
+msgstr "Subjek"
+
+msgid "plugins.generic.editorialTimelineManager.recipients"
+msgstr "Penerima"
+
+msgid "plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated"
+msgstr "Tanggal keputusan dan email notifikasi penulis berhasil diperbarui di database!"
+
+msgid "plugins.generic.editorialTimelineManager.error.updateDecision"
+msgstr "Gagal memperbarui tanggal keputusan dan notifikasi di database."
+

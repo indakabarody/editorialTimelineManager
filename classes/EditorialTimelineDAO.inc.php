@@ -271,10 +271,64 @@ class EditorialTimelineDAO extends DAO
             ->where('ed.submission_id', '=', $submissionId)
             ->select(['ed.edit_decision_id', 'ed.editor_id', 'ed.decision', 'ed.date_decided', 'ed.review_round_id', 'ed.stage_id', 'ed.round', 'u.username as editor_username'])
             ->orderBy('ed.date_decided', 'asc')
+            ->orderBy('ed.edit_decision_id', 'asc')
             ->get();
 
+        $assocTypeSubmission = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 1048585;
+        $eventEditorNotify = defined('SUBMISSION_EMAIL_EDITOR_NOTIFY_AUTHOR') ? SUBMISSION_EMAIL_EDITOR_NOTIFY_AUTHOR : 805306369;
+        $eventEditorUnsuitable = defined('SUBMISSION_EMAIL_EDITOR_NOTIFY_AUTHOR_UNSUITABLE') ? SUBMISSION_EMAIL_EDITOR_NOTIFY_AUTHOR_UNSUITABLE : 805306371;
+
+        // Fetch author notification emails from email_log for this submission
+        $emailRows = Capsule::table('email_log as el')
+            ->leftJoin('users as u', 'el.sender_id', '=', 'u.user_id')
+            ->where('el.assoc_type', '=', $assocTypeSubmission)
+            ->where('el.assoc_id', '=', $submissionId)
+            ->where(function ($q) use ($eventEditorNotify, $eventEditorUnsuitable) {
+                $q->where('el.event_type', '=', $eventEditorNotify)->orWhere('el.event_type', '=', $eventEditorUnsuitable)->orWhere('el.subject', 'LIKE', '%Editor Decision%')->orWhere('el.subject', 'LIKE', '%Keputusan Editor%');
+            })
+            ->select(['el.log_id', 'el.sender_id', 'el.date_sent', 'el.event_type', 'el.from_address', 'el.recipients', 'el.subject', 'u.username as sender_username'])
+            ->orderBy('el.date_sent', 'asc')
+            ->orderBy('el.log_id', 'asc')
+            ->get();
+
+        $decisionEmails = [];
+        foreach ($emailRows as $er) {
+            $decisionEmails[] = [
+                'log_id' => (int) $er->log_id,
+                'sender_id' => (int) $er->sender_id,
+                'sender_username' => $er->sender_username ?: 'User #' . $er->sender_id,
+                'date_sent' => $er->date_sent,
+                'date_sent_formatted' => $er->date_sent ? date('Y-m-d\TH:i', strtotime($er->date_sent)) : '',
+                'subject' => $er->subject,
+                'recipients' => $er->recipients,
+            ];
+        }
+
+        // Map matching email to each decision
+        $usedEmailIds = [];
         $decisions = [];
         foreach ($decisionRows as $dec) {
+            $matchedEmail = null;
+            $decTs = !empty($dec->date_decided) ? strtotime($dec->date_decided) : 0;
+
+            $bestDiff = null;
+            $bestIdx = null;
+            foreach ($decisionEmails as $idx => $em) {
+                if (in_array($em['log_id'], $usedEmailIds)) {
+                    continue;
+                }
+                $emTs = !empty($em['date_sent']) ? strtotime($em['date_sent']) : 0;
+                $diff = abs($decTs - $emTs);
+                if ($bestDiff === null || $diff < $bestDiff) {
+                    $bestDiff = $diff;
+                    $bestIdx = $idx;
+                }
+            }
+            if ($bestIdx !== null && $bestDiff !== null && $bestDiff <= 86400 * 3) {
+                $matchedEmail = $decisionEmails[$bestIdx];
+                $usedEmailIds[] = $matchedEmail['log_id'];
+            }
+
             $decisions[] = [
                 'edit_decision_id' => (int) $dec->edit_decision_id,
                 'editor_id' => (int) $dec->editor_id,
@@ -285,6 +339,8 @@ class EditorialTimelineDAO extends DAO
                 'stage_name' => EditorialTimelineHelper::getWorkflowStageName($dec->stage_id),
                 'round' => (int) $dec->round,
                 'date_decided' => $dec->date_decided,
+                'review_round_id' => (int) $dec->review_round_id,
+                'email_log' => $matchedEmail,
             ];
         }
 
@@ -320,7 +376,7 @@ class EditorialTimelineDAO extends DAO
                     'date_created' => $note->date_created,
                     'date_modified' => $note->date_modified,
                     'title' => $note->title,
-                    'snippet' => substr(strip_tags($note->contents), 0, 80),
+                    'snippet' => EditorialTimelineHelper::truncateSafe(strip_tags($note->contents), 80),
                 ];
             }
 
@@ -336,7 +392,7 @@ class EditorialTimelineDAO extends DAO
             ];
         }
 
-        return [
+        return EditorialTimelineHelper::cleanUtf8([
             'submission' => [
                 'submission_id' => (int) $submissionRow->submission_id,
                 'title' => $submissionTitle,
@@ -354,10 +410,11 @@ class EditorialTimelineDAO extends DAO
             'stage_counts' => $stageCounts,
             'reviews' => $reviews,
             'decisions' => $decisions,
+            'decision_emails' => $decisionEmails,
             'discussions' => $discussions,
             'activity_logs' => $this->getActivityLogs($submissionId, $contextId),
             'journal_users' => $this->getJournalUsers($contextId, $submissionId),
-        ];
+        ]);
     }
 
     /**
@@ -469,7 +526,7 @@ class EditorialTimelineDAO extends DAO
                 'stage_name' => EditorialTimelineHelper::getWorkflowStageName($row->stage_id),
             ];
         }
-        return $results;
+        return EditorialTimelineHelper::cleanUtf8($results);
     }
 
     /**
@@ -493,6 +550,7 @@ class EditorialTimelineDAO extends DAO
                 'files' => 0,
                 'reviews' => 0,
                 'decisions' => 0,
+                'decision_emails' => 0,
                 'discussions' => 0,
                 'activity_logs' => 0,
             ];
@@ -588,7 +646,10 @@ class EditorialTimelineDAO extends DAO
                 }
             }
 
-            // 6. Update Editorial Decisions
+            // 6. Update Editorial Decisions & Synchronize Notification Emails
+            $assocTypeSubmission = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 1048585;
+            $assocTypeReviewRound = defined('ASSOC_TYPE_REVIEW_ROUND') ? ASSOC_TYPE_REVIEW_ROUND : 258;
+
             if (!empty($payload['decisions']) && is_array($payload['decisions'])) {
                 foreach ($payload['decisions'] as $decId => $decData) {
                     if (isset($decData['date_decided'])) {
@@ -598,6 +659,54 @@ class EditorialTimelineDAO extends DAO
                             ->where('submission_id', '=', $submissionId)
                             ->update(['date_decided' => $dateDecided]);
                         $affected['decisions'] += $c;
+
+                        $decRow = Capsule::table('edit_decisions')->where('edit_decision_id', '=', (int) $decId)->first();
+
+                        // 6A. Synchronize associated author notification email (email_log.date_sent)
+                        $emailLogId = !empty($decData['email_log_id']) ? (int) $decData['email_log_id'] : null;
+                        $syncEmail = !isset($decData['sync_email']) || !empty($decData['sync_email']);
+
+                        if ($emailLogId && $syncEmail && $dateDecided) {
+                            $affectedEmail = Capsule::table('email_log')
+                                ->where('log_id', '=', $emailLogId)
+                                ->where('assoc_type', '=', $assocTypeSubmission)
+                                ->where('assoc_id', '=', $submissionId)
+                                ->update(['date_sent' => $dateDecided]);
+                            $affected['decision_emails'] += $affectedEmail;
+                        }
+
+                        // 6B. Synchronize notifications table date_created
+                        if ($dateDecided && $decRow) {
+                            Capsule::table('notifications')
+                                ->where('assoc_type', '=', $assocTypeSubmission)
+                                ->where('assoc_id', '=', $submissionId)
+                                ->whereIn('type', [16777229, 16777230, 16777231, 16777232, 16777233, 16777264, 16777234, 16777248, 16777235])
+                                ->update(['date_created' => $dateDecided]);
+
+                            if (!empty($decRow->review_round_id)) {
+                                Capsule::table('notifications')
+                                    ->where('assoc_type', '=', $assocTypeReviewRound)
+                                    ->where('assoc_id', '=', (int) $decRow->review_round_id)
+                                    ->update(['date_created' => $dateDecided]);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 6C. Explicit update for decision notification emails (email_log)
+            if (!empty($payload['decision_emails']) && is_array($payload['decision_emails'])) {
+                foreach ($payload['decision_emails'] as $emailLogId => $emailData) {
+                    if (isset($emailData['date_sent'])) {
+                        $dateSent = EditorialTimelineHelper::fromHtmlDatetime($emailData['date_sent']);
+                        if ($dateSent) {
+                            $c = Capsule::table('email_log')
+                                ->where('log_id', '=', (int) $emailLogId)
+                                ->where('assoc_type', '=', $assocTypeSubmission)
+                                ->where('assoc_id', '=', $submissionId)
+                                ->update(['date_sent' => $dateSent]);
+                            $affected['decision_emails'] += $c;
+                        }
                     }
                 }
             }
@@ -759,6 +868,78 @@ class EditorialTimelineDAO extends DAO
     }
 
     /**
+     * Directly update an editorial decision and its associated notification email in database (1-Click).
+     *
+     * @param int $submissionId
+     * @param int $contextId
+     * @param int $decisionId
+     * @param string $dateDecided
+     * @param int|null $emailLogId
+     * @param string|null $dateSent
+     * @return array
+     */
+    public function directUpdateDecision($submissionId, $contextId, $decisionId, $dateDecided, $emailLogId = null, $dateSent = null)
+    {
+        $submissionId = (int) $submissionId;
+        $contextId = (int) $contextId;
+        $decisionId = (int) $decisionId;
+
+        $sub = Capsule::table('submissions')->where('submission_id', '=', $submissionId)->where('context_id', '=', $contextId)->first();
+        if (!$sub) {
+            throw new Exception('Submission not found or access denied.');
+        }
+
+        $dbDateDecided = EditorialTimelineHelper::fromHtmlDatetime($dateDecided);
+        if (!$dbDateDecided) {
+            throw new Exception('Invalid decision date format.');
+        }
+
+        $assocTypeSubmission = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 1048585;
+        $assocTypeReviewRound = defined('ASSOC_TYPE_REVIEW_ROUND') ? ASSOC_TYPE_REVIEW_ROUND : 258;
+
+        $affectedDec = Capsule::table('edit_decisions')
+            ->where('edit_decision_id', '=', $decisionId)
+            ->where('submission_id', '=', $submissionId)
+            ->update(['date_decided' => $dbDateDecided]);
+
+        $decRow = Capsule::table('edit_decisions')->where('edit_decision_id', '=', $decisionId)->first();
+
+        // Update email_log
+        $affectedEmail = 0;
+        $targetEmailDate = !empty($dateSent) ? EditorialTimelineHelper::fromHtmlDatetime($dateSent) : $dbDateDecided;
+        if ($emailLogId && $targetEmailDate) {
+            $affectedEmail = Capsule::table('email_log')
+                ->where('log_id', '=', (int) $emailLogId)
+                ->where('assoc_type', '=', $assocTypeSubmission)
+                ->where('assoc_id', '=', $submissionId)
+                ->update(['date_sent' => $targetEmailDate]);
+        }
+
+        // Update notifications table
+        if ($decRow && $dbDateDecided) {
+            Capsule::table('notifications')
+                ->where('assoc_type', '=', $assocTypeSubmission)
+                ->where('assoc_id', '=', $submissionId)
+                ->whereIn('type', [16777229, 16777230, 16777231, 16777232, 16777233, 16777264, 16777234, 16777248, 16777235])
+                ->update(['date_created' => $dbDateDecided]);
+
+            if (!empty($decRow->review_round_id)) {
+                Capsule::table('notifications')
+                    ->where('assoc_type', '=', $assocTypeReviewRound)
+                    ->where('assoc_id', '=', (int) $decRow->review_round_id)
+                    ->update(['date_created' => $dbDateDecided]);
+            }
+        }
+
+        return [
+            'affected_decision' => $affectedDec,
+            'affected_email' => $affectedEmail,
+            'date_decided' => $dbDateDecided,
+            'date_sent' => $targetEmailDate,
+        ];
+    }
+
+    /**
      * Calculate a shifted timeline preview by applying an offset in days.
      *
      * @param array $timelineData
@@ -835,11 +1016,25 @@ class EditorialTimelineDAO extends DAO
             }
         }
 
-        // 5. Shift decisions
-        if (!empty($options['shift_decisions']) && !empty($timelineData['decisions'])) {
-            foreach ($timelineData['decisions'] as &$dec) {
-                if (!empty($dec['date_decided'])) {
-                    $dec['date_decided'] = $shiftDate($dec['date_decided']);
+        // 5. Shift decisions and notification emails
+        if (!empty($options['shift_decisions'])) {
+            if (!empty($timelineData['decisions'])) {
+                foreach ($timelineData['decisions'] as &$dec) {
+                    if (!empty($dec['date_decided'])) {
+                        $dec['date_decided'] = $shiftDate($dec['date_decided']);
+                    }
+                    if (!empty($dec['email_log']['date_sent'])) {
+                        $dec['email_log']['date_sent'] = $shiftDate($dec['email_log']['date_sent']);
+                        $dec['email_log']['date_sent_formatted'] = EditorialTimelineHelper::toHtmlDatetime($dec['email_log']['date_sent']);
+                    }
+                }
+            }
+            if (!empty($timelineData['decision_emails'])) {
+                foreach ($timelineData['decision_emails'] as &$em) {
+                    if (!empty($em['date_sent'])) {
+                        $em['date_sent'] = $shiftDate($em['date_sent']);
+                        $em['date_sent_formatted'] = EditorialTimelineHelper::toHtmlDatetime($em['date_sent']);
+                    }
                 }
             }
         }
@@ -860,7 +1055,7 @@ class EditorialTimelineDAO extends DAO
             }
         }
 
-        return $timelineData;
+        return EditorialTimelineHelper::cleanUtf8($timelineData);
     }
 
     /**
@@ -933,12 +1128,15 @@ class EditorialTimelineDAO extends DAO
                     // Auto-heal existing records in DB that were saved with is_translated = 0 on literal sentences
                     if ($isTranslated === 0 && (strpos($rawMessage, ' ') !== false || preg_match('/^##.*##$/s', $entry->getMessage()))) {
                         try {
-                            Capsule::table('event_log')->where('log_id', '=', (int) $entry->getId())->update([
-                                'message' => $translatedMessage,
-                                'is_translated' => 1,
-                            ]);
+                            Capsule::table('event_log')
+                                ->where('log_id', '=', (int) $entry->getId())
+                                ->update([
+                                    'message' => $translatedMessage,
+                                    'is_translated' => 1,
+                                ]);
                             $isTranslated = 1;
-                        } catch (Exception $e) {}
+                        } catch (Exception $e) {
+                        }
                     }
 
                     $isPluginLog = strpos($rawMessage, 'plugins.generic.editorialTimelineManager') !== false || strpos($translatedMessage, 'Editorial workflow timeline dates were modified') !== false;
@@ -995,12 +1193,15 @@ class EditorialTimelineDAO extends DAO
 
                 if ($isTrans === 0 && (strpos($rawMsg, ' ') !== false || preg_match('/^##.*##$/s', $row->message))) {
                     try {
-                        Capsule::table('event_log')->where('log_id', '=', (int) $row->log_id)->update([
-                            'message' => $displayMsg,
-                            'is_translated' => 1,
-                        ]);
+                        Capsule::table('event_log')
+                            ->where('log_id', '=', (int) $row->log_id)
+                            ->update([
+                                'message' => $displayMsg,
+                                'is_translated' => 1,
+                            ]);
                         $isTrans = 1;
-                    } catch (Exception $e) {}
+                    } catch (Exception $e) {
+                    }
                 }
 
                 $isPlugin = strpos($rawMsg, 'plugins.generic.editorialTimelineManager') !== false || strpos($displayMsg, 'Editorial workflow timeline dates were modified') !== false;
@@ -1032,7 +1233,7 @@ class EditorialTimelineDAO extends DAO
             return $tB - $tA;
         });
 
-        return $logs;
+        return EditorialTimelineHelper::cleanUtf8($logs);
     }
 
     /**

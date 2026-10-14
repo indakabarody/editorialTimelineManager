@@ -584,3 +584,33 @@ msgstr "Reviewer schedule directly updated in database!"
 msgid "plugins.generic.editorialTimelineManager.error.roleUnauthorized"
 msgstr "Access denied. Editorial Timeline Manager is only accessible by Site Administrators and Journal Managers."
 
+msgid "plugins.generic.editorialTimelineManager.decisionNotificationEmail"
+msgstr "Notification Email to Author (Review Round Notifications)"
+
+msgid "plugins.generic.editorialTimelineManager.syncDecisionNotification"
+msgstr "Auto-sync notification email date with decision date"
+
+msgid "plugins.generic.editorialTimelineManager.noLinkedEmail"
+msgstr "No linked author notification email"
+
+msgid "plugins.generic.editorialTimelineManager.saveDecisionToDbDirectly"
+msgstr "Update Decision & Notification Directly in Database"
+
+msgid "plugins.generic.editorialTimelineManager.allDecisionEmails"
+msgstr "All Author Decision Notification Emails"
+
+msgid "plugins.generic.editorialTimelineManager.dateSent"
+msgstr "Date Sent"
+
+msgid "plugins.generic.editorialTimelineManager.subject"
+msgstr "Subject"
+
+msgid "plugins.generic.editorialTimelineManager.recipients"
+msgstr "Recipients"
+
+msgid "plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated"
+msgstr "Decision date and author notification email updated successfully in database!"
+
+msgid "plugins.generic.editorialTimelineManager.error.updateDecision"
+msgstr "Failed to update decision date and notification in database."
+

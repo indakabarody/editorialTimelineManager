@@ -304,6 +304,59 @@
 			});
 		});
 
+		// 7B. Direct Update Editorial Decision & Author Notification Email (1-Click)
+		$app.on('input change', '.etm-dec-date', function() {
+			const decId = $(this).data('dec-id');
+			const $row = $('#etmDecRow_' + decId);
+			const $sync = $row.find('.etm-sync-dec-email');
+			if ($sync.length && $sync.is(':checked')) {
+				$row.find('.etm-email-date').val($(this).val());
+			}
+		});
+
+		$app.on('click', '.etm-direct-decision-btn', function() {
+			const decId = $(this).data('dec-id');
+			const emailLogId = $(this).data('email-id');
+			const $row = $('#etmDecRow_' + decId);
+			const $btn = $(this);
+
+			const dateDecided = $row.find('.etm-dec-date').val();
+			const dateSent = $row.find('.etm-email-date').val();
+
+			if (!dateDecided) {
+				alert(t('selectDatePrompt', 'Please select a date and time.'));
+				return;
+			}
+
+			$btn.prop('disabled', true);
+
+			$.ajax({
+				url: config.directUpdateDecisionUrl,
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					csrfToken: getCsrfToken(),
+					submissionId: subId,
+					decisionId: decId,
+					dateDecided: dateDecided,
+					emailLogId: emailLogId,
+					dateSent: dateSent
+				},
+				success: function(resp) {
+					$btn.prop('disabled', false);
+					if (resp && resp.status) {
+						showAlert((resp.content && resp.content.message) || t('decisionUpdatedSuccess', 'Editorial decision and notification email directly updated in database!'), 'success');
+					} else {
+						showAlert((resp && resp.content) || t('updateDecisionError', 'Database update failed while updating decision.'), 'error');
+					}
+				},
+				error: function() {
+					$btn.prop('disabled', false);
+					showAlert(t('networkError', 'Network or communication error occurred with the server.'), 'error');
+				}
+			});
+		});
+
 		// 8. Quick Batch Timeline Offset (Stepper and Form Application)
 		$('.etm-btn-step').on('click', function() {
 			const step = parseInt($(this).data('step'), 10);
@@ -404,6 +457,15 @@
 			if (data.decisions) {
 				data.decisions.forEach(function(dec) {
 					$form.find('input[name="decisions[' + dec.edit_decision_id + '][date_decided]"]').val(toDt(dec.date_decided));
+					if (dec.email_log && dec.email_log.date_sent) {
+						$form.find('input[name="decision_emails[' + dec.email_log.log_id + '][date_sent]"]').val(toDt(dec.email_log.date_sent));
+					}
+				});
+			}
+
+			if (data.decision_emails) {
+				data.decision_emails.forEach(function(em) {
+					$form.find('input[name="decision_emails[' + em.log_id + '][date_sent]"]').val(toDt(em.date_sent));
 				});
 			}
 
@@ -429,6 +491,7 @@
 				files: {},
 				reviews: {},
 				decisions: {},
+				decision_emails: {},
 				discussions: {}
 			};
 
@@ -463,10 +526,34 @@
 				});
 			});
 
-			$form.find('input[name^="decisions["]').each(function() {
-				const match = $(this).attr('name').match(/decisions\[(\d+)\]\[date_decided\]/);
+			$form.find('tr[id^="etmDecRow_"]').each(function() {
+				const decId = $(this).data('dec-id');
+				if (decId) {
+					const dateDecided = $(this).find('.etm-dec-date').val();
+					const emailLogId = $(this).find('input[name="decisions[' + decId + '][email_log_id]"]').val();
+					const syncEmail = $(this).find('.etm-sync-dec-email').is(':checked');
+
+					payload.decisions[decId] = {
+						date_decided: dateDecided,
+						email_log_id: emailLogId || null,
+						sync_email: syncEmail ? 1 : 0
+					};
+				}
+			});
+
+			if (Object.keys(payload.decisions).length === 0) {
+				$form.find('input[name^="decisions["][name$="[date_decided]"]').each(function() {
+					const match = $(this).attr('name').match(/decisions\[(\d+)\]\[date_decided\]/);
+					if (match) {
+						payload.decisions[match[1]] = { date_decided: $(this).val() };
+					}
+				});
+			}
+
+			$form.find('input[name^="decision_emails["]').each(function() {
+				const match = $(this).attr('name').match(/decision_emails\[(\d+)\]\[date_sent\]/);
 				if (match) {
-					payload.decisions[match[1]] = { date_decided: $(this).val() };
+					payload.decision_emails[match[1]] = { date_sent: $(this).val() };
 				}
 			});
 

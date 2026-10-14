@@ -17,11 +17,92 @@ import('classes.workflow.EditorDecisionActionsManager');
 class EditorialTimelineHelper
 {
     /**
-     * Get the human-readable localized name for a file stage.
+     * Recursively sanitize and ensure all strings in an array or data structure are valid UTF-8.
+     * Prevents json_encode errors (e.g. "Malformed UTF-8 characters, possibly incorrectly encoded").
      *
-     * @param int $fileStage
+     * @param mixed $data
+     * @return mixed
+     */
+    public static function cleanUtf8($data)
+    {
+        if (is_array($data)) {
+            $cleaned = [];
+            foreach ($data as $key => $value) {
+                $cleanKey = is_string($key) ? self::cleanUtf8String($key) : $key;
+                $cleaned[$cleanKey] = self::cleanUtf8($value);
+            }
+            return $cleaned;
+        } elseif (is_string($data)) {
+            return self::cleanUtf8String($data);
+        }
+        return $data;
+    }
+
+    /**
+     * Clean and convert a single string to guaranteed valid UTF-8.
+     * Supports CJK / Mandarin encodings (GBK, GB2312, BIG5, CP936) as well as Latin encodings.
+     *
+     * @param string|null $str
      * @return string
      */
+    public static function cleanUtf8String($str)
+    {
+        if ($str === null || $str === '') {
+            return (string) $str;
+        }
+
+        // Check if string is already valid UTF-8
+        if (preg_match('//u', $str)) {
+            return $str;
+        }
+
+        // Try detecting common Asian/Mandarin or legacy encodings
+        if (function_exists('mb_detect_encoding')) {
+            $detected = mb_detect_encoding($str, ['UTF-8', 'GBK', 'GB2312', 'BIG5', 'CP936', 'ISO-8859-1', 'Windows-1252', 'ASCII'], true);
+            if ($detected && $detected !== 'UTF-8') {
+                $converted = @mb_convert_encoding($str, 'UTF-8', $detected);
+                if ($converted !== false && preg_match('//u', $converted)) {
+                    return $converted;
+                }
+            }
+        }
+
+        // Strip or replace broken multi-byte sequences using mb_convert_encoding
+        if (function_exists('mb_convert_encoding')) {
+            $converted = @mb_convert_encoding($str, 'UTF-8', 'UTF-8');
+            if ($converted !== false && preg_match('//u', $converted)) {
+                return $converted;
+            }
+        }
+
+        // Fallback to iconv with //IGNORE to discard malformed bytes
+        if (function_exists('iconv')) {
+            $converted = @iconv('UTF-8', 'UTF-8//IGNORE', $str);
+            if ($converted !== false && preg_match('//u', $converted)) {
+                return $converted;
+            }
+        }
+
+        // Last resort: utf8_encode
+        return function_exists('utf8_encode') ? utf8_encode($str) : $str;
+    }
+
+    /**
+     * Multi-byte safe string truncation with UTF-8 support.
+     *
+     * @param string $str
+     * @param int $length
+     * @return string
+     */
+    public static function truncateSafe($str, $length = 80)
+    {
+        $str = self::cleanUtf8String($str);
+        if (function_exists('mb_substr')) {
+            return mb_substr($str, 0, $length, 'UTF-8');
+        }
+        return substr($str, 0, $length);
+    }
+
     public static function getFileStageName($fileStage)
     {
         switch ((int) $fileStage) {

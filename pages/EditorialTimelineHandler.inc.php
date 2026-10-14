@@ -27,7 +27,7 @@ class EditorialTimelineHandler extends Handler
     {
         parent::__construct();
 
-        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs']);
+        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'directUpdateDecision', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs']);
     }
 
     /**
@@ -164,7 +164,8 @@ class EditorialTimelineHandler extends Handler
             ]);
 
             if ($isAjax) {
-                return new JSONMessage(true, $templateMgr->fetch($plugin->getTemplateResource('timelineModal.tpl')));
+                $html = $templateMgr->fetch($plugin->getTemplateResource('timelineModal.tpl'));
+                return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8($html));
             }
 
             return $templateMgr->display($plugin->getTemplateResource('timelineModal.tpl'));
@@ -178,7 +179,8 @@ class EditorialTimelineHandler extends Handler
         ]);
 
         if ($isAjax) {
-            return new JSONMessage(true, $templateMgr->fetch($plugin->getTemplateResource('submissionPicker.tpl')));
+            $html = $templateMgr->fetch($plugin->getTemplateResource('submissionPicker.tpl'));
+            return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8($html));
         }
 
         return $templateMgr->display($plugin->getTemplateResource('submissionPicker.tpl'));
@@ -211,7 +213,7 @@ class EditorialTimelineHandler extends Handler
             return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.submissionNotFound'));
         }
 
-        return new JSONMessage(true, $data);
+        return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8($data));
     }
 
     /**
@@ -233,7 +235,7 @@ class EditorialTimelineHandler extends Handler
         $dao = new EditorialTimelineDAO();
         $results = $dao->searchSubmissions($context->getId(), $query, 20);
 
-        return new JSONMessage(true, $results);
+        return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8($results));
     }
 
     /**
@@ -311,7 +313,7 @@ class EditorialTimelineHandler extends Handler
 
         $shiftedData = $dao->shiftTimelineData($data, $daysOffset, $options);
 
-        return new JSONMessage(true, $shiftedData);
+        return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8($shiftedData));
     }
 
     /**
@@ -394,6 +396,47 @@ class EditorialTimelineHandler extends Handler
                 'message' => __('plugins.generic.editorialTimelineManager.success.reviewDirectlyUpdated'),
                 'affected' => $affected,
             ]);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Directly update an editorial decision & author notification email immediately (1-Click).
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function directUpdateDecision($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        if (!$request->checkCSRF()) {
+            return new JSONMessage(false, __('form.csrfInvalid'));
+        }
+
+        $context = $request->getContext();
+        $submissionId = (int) $request->getUserVar('submissionId');
+        $decisionId = (int) $request->getUserVar('decisionId');
+        $dateDecided = (string) $request->getUserVar('dateDecided');
+        $emailLogId = (int) $request->getUserVar('emailLogId');
+        $dateSent = (string) $request->getUserVar('dateSent');
+
+        if (!$submissionId || !$decisionId || empty($dateDecided)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $result = $dao->directUpdateDecision($submissionId, $context->getId(), $decisionId, $dateDecided, $emailLogId, $dateSent);
+
+            return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8([
+                'message' => __('plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated'),
+                'result' => $result,
+            ]));
         } catch (Exception $e) {
             return new JSONMessage(false, $e->getMessage());
         }

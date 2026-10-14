@@ -173,6 +173,9 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
             case 'directUpdateReview':
                 return $handler->directUpdateReview($args, $request);
 
+            case 'directUpdateDecision':
+                return $handler->directUpdateDecision($args, $request);
+
             case 'shiftTimeline':
                 return $handler->shiftTimeline($args, $request);
 

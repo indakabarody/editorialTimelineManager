@@ -505,7 +505,7 @@
 		</section>
 
 		<!-- ============================================================== -->
-		<!-- TAB 4: EDITORIAL DECISIONS                                    -->
+		<!-- TAB 4: EDITORIAL DECISIONS & NOTIFICATIONS                     -->
 		<!-- ============================================================== -->
 		<section class="etm-tab-panel" id="tabDecisions_{$submissionId}">
 			{if $timeline.decisions && count($timeline.decisions) > 0}
@@ -513,20 +513,26 @@
 					<table class="etm-table etm-decisions-table">
 						<thead>
 							<tr>
-								<th style="width: 80px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
-								<th>{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
-								<th>{translate key="plugins.generic.editorialTimelineManager.round"}</th>
+								<th style="width: 70px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
+								<th style="width: 130px;">{translate key="plugins.generic.editorialTimelineManager.stage.stage"}</th>
+								<th style="width: 90px;">{translate key="plugins.generic.editorialTimelineManager.round"}</th>
 								<th>{translate key="plugins.generic.editorialTimelineManager.decision.decision"}</th>
-								<th>{translate key="plugins.generic.editorialTimelineManager.editor"}</th>
-								<th style="width: 240px;">{translate key="plugins.generic.editorialTimelineManager.decisionDate"}</th>
+								<th style="width: 120px;">{translate key="plugins.generic.editorialTimelineManager.editor"}</th>
+								<th style="width: 210px;">{translate key="plugins.generic.editorialTimelineManager.decisionDate"}</th>
+								<th style="width: 240px;">{translate key="plugins.generic.editorialTimelineManager.decisionNotificationEmail"} (<code>email_log</code>)</th>
+								<th style="width: 80px; text-align: center;">{translate key="plugins.generic.editorialTimelineManager.action"}</th>
 							</tr>
 						</thead>
 						<tbody>
 							{foreach from=$timeline.decisions item=dec}
-								<tr>
+								<tr id="etmDecRow_{$dec.edit_decision_id}" data-dec-id="{$dec.edit_decision_id}">
 									<td><strong>#{$dec.edit_decision_id}</strong></td>
 									<td><span class="etm-stage-badge">{$dec.stage_name|escape}</span></td>
-									<td>{$dec.round|default:1}</td>
+									<td>
+										<span class="etm-badge etm-badge-secondary">
+											{translate key="plugins.generic.editorialTimelineManager.round"} {$dec.round|default:1}
+										</span>
+									</td>
 									<td>
 										<span class="etm-badge etm-badge-primary">
 											<i class="fa fa-check"></i> {$dec.decision_name|escape}
@@ -536,16 +542,102 @@
 									<td>
 										<input
 											type="datetime-local"
-											class="etm-input etm-datetime"
+											class="etm-input etm-datetime etm-dec-date"
+											id="etmDecDate_{$dec.edit_decision_id}"
+											data-dec-id="{$dec.edit_decision_id}"
 											name="decisions[{$dec.edit_decision_id}][date_decided]"
 											value="{EditorialTimelineHelper::toHtmlDatetime($dec.date_decided)}"
 										/>
+									</td>
+									<td>
+										{if $dec.email_log}
+											<div class="etm-dec-email-box">
+												<input type="hidden" name="decisions[{$dec.edit_decision_id}][email_log_id]" value="{$dec.email_log.log_id}" />
+												<div style="font-size: 11px; color: #64748b; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px;" title="{$dec.email_log.subject|escape}">
+													<i class="fa fa-envelope-o"></i> <strong>#{$dec.email_log.log_id}</strong> {$dec.email_log.subject|escape}
+												</div>
+												<input
+													type="datetime-local"
+													class="etm-input etm-datetime etm-email-date"
+													id="etmEmailDate_{$dec.edit_decision_id}"
+													data-dec-id="{$dec.edit_decision_id}"
+													data-log-id="{$dec.email_log.log_id}"
+													name="decision_emails[{$dec.email_log.log_id}][date_sent]"
+													value="{EditorialTimelineHelper::toHtmlDatetime($dec.email_log.date_sent)}"
+												/>
+												<label style="font-size: 11px; color: #475569; display: flex; align-items: center; gap: 4px; margin-top: 4px; cursor: pointer;">
+													<input
+														type="checkbox"
+														class="etm-sync-dec-email"
+														data-dec-id="{$dec.edit_decision_id}"
+														data-log-id="{$dec.email_log.log_id}"
+														name="decisions[{$dec.edit_decision_id}][sync_email]"
+														value="1"
+														checked
+													/>
+													{translate key="plugins.generic.editorialTimelineManager.syncDecisionNotification"}
+												</label>
+											</div>
+										{else}
+											<span class="etm-help-text" style="color: #94a3b8; font-size: 12px;">
+												<i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.noLinkedEmail"}
+											</span>
+										{/if}
+									</td>
+									<td style="text-align: center; vertical-align: middle;">
+										<button
+											type="button"
+											class="pkp_button pkp_button_primary etm-direct-decision-btn"
+											data-dec-id="{$dec.edit_decision_id}"
+											data-email-id="{if $dec.email_log}{$dec.email_log.log_id}{else}0{/if}"
+											title="{translate key="plugins.generic.editorialTimelineManager.saveDecisionToDbDirectly"}"
+										>
+											<i class="fa fa-bolt"></i> <span>{translate key="plugins.generic.editorialTimelineManager.save"}</span>
+										</button>
 									</td>
 								</tr>
 							{/foreach}
 						</tbody>
 					</table>
 				</div>
+
+				{if $timeline.decision_emails && count($timeline.decision_emails) > 0}
+					<div class="etm-card" style="margin-top: 18px;">
+						<div class="etm-card-header">
+							<h4><i class="fa fa-envelope-open-o"></i> {translate key="plugins.generic.editorialTimelineManager.allDecisionEmails"} (<code>email_log</code>)</h4>
+						</div>
+						<div class="etm-card-body" style="padding: 0;">
+							<table class="etm-table">
+								<thead>
+									<tr>
+										<th style="width: 70px;">{translate key="plugins.generic.editorialTimelineManager.tableId"}</th>
+										<th>{translate key="plugins.generic.editorialTimelineManager.subject"}</th>
+										<th>{translate key="plugins.generic.editorialTimelineManager.recipients"}</th>
+										<th style="width: 220px;">{translate key="plugins.generic.editorialTimelineManager.dateSent"}</th>
+									</tr>
+								</thead>
+								<tbody>
+									{foreach from=$timeline.decision_emails item=em}
+										<tr>
+											<td><strong>#{$em.log_id}</strong></td>
+											<td><i class="fa fa-envelope-o"></i> {$em.subject|escape}</td>
+											<td><small style="color: #64748b;">{$em.recipients|escape}</small></td>
+											<td>
+												<input
+													type="datetime-local"
+													class="etm-input etm-datetime etm-email-date"
+													data-log-id="{$em.log_id}"
+													name="decision_emails[{$em.log_id}][date_sent]"
+													value="{EditorialTimelineHelper::toHtmlDatetime($em.date_sent)}"
+												/>
+											</td>
+										</tr>
+									{/foreach}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				{/if}
 			{else}
 				<div class="etm-empty-card">
 					<p><i class="fa fa-info-circle"></i> {translate key="plugins.generic.editorialTimelineManager.noDecisionsFound"}</p>
@@ -831,7 +923,9 @@
 		deleteLogError: '{translate key="plugins.generic.editorialTimelineManager.error.deleteLog"}',
 		cleanLogsError: '{translate key="plugins.generic.editorialTimelineManager.error.cleanLogs"}',
 		logsCleanedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.pluginLogsCleaned"}',
-		reviewUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.reviewerUpdated"}'
+		reviewUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.reviewerUpdated"}',
+		decisionUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated"}',
+		updateDecisionError: '{translate key="plugins.generic.editorialTimelineManager.error.updateDecision"}'
 	{rdelim});
 
 	function t(key, fallback, replacements) {ldelim}
@@ -868,6 +962,7 @@
 				saveUrl: '{url router=$smarty.const.ROUTE_PAGE page="editorialTimeline" op="saveTimeline" submissionId=$submissionId}',
 				directUpdateFilesUrl: '{url router=$smarty.const.ROUTE_PAGE page="editorialTimeline" op="directUpdateFiles" submissionId=$submissionId}',
 				directUpdateReviewUrl: '{url router=$smarty.const.ROUTE_PAGE page="editorialTimeline" op="directUpdateReview" submissionId=$submissionId}',
+				directUpdateDecisionUrl: '{url router=$smarty.const.ROUTE_PAGE page="editorialTimeline" op="directUpdateDecision" submissionId=$submissionId}',
 				directUpdateActivityLogUrl: updateLogUrl,
 				deleteActivityLogUrl: deleteLogUrl,
 				createActivityLogUrl: createLogUrl,
