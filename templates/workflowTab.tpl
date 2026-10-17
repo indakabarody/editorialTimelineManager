@@ -18,6 +18,19 @@
 
 <script type="text/javascript">
 (function($) {ldelim}
+	window.EditorialTimelineConfig = window.EditorialTimelineConfig || {};
+	$.extend(window.EditorialTimelineConfig, {ldelim}
+		submissionId: {$editorialTimelineSubmissionId|json_encode},
+		csrfToken: {$editorialTimelineCsrfToken|json_encode},
+		timelineUrl: {$editorialTimelineUrl|json_encode},
+		updateEventLogDateUrl: {$editorialTimelineUpdateEventLogDateUrl|json_encode},
+		getEventLogDetailsUrl: {$editorialTimelineGetEventLogDetailsUrl|json_encode},
+		updateFileDateUrl: {$editorialTimelineUpdateFileDateUrl|json_encode},
+		updateNoteDateUrl: {$editorialTimelineUpdateNoteDateUrl|json_encode},
+		updateActivityLogUrl: {$editorialTimelineUpdateActivityLogUrl|json_encode},
+		getFileDetailsUrl: {$editorialTimelineGetFileDetailsUrl|json_encode}
+	{rdelim});
+
 	window.EditorialTimelineLocales = window.EditorialTimelineLocales || {};
 	$.extend(window.EditorialTimelineLocales, {ldelim}
 		displayName: '{translate key="plugins.generic.editorialTimelineManager.displayName"}',
@@ -46,6 +59,12 @@
 		copy: '{translate key="plugins.generic.editorialTimelineManager.copy"}',
 		save: '{translate key="plugins.generic.editorialTimelineManager.save"}',
 		delete: '{translate key="plugins.generic.editorialTimelineManager.delete"}',
+		cancel: '{translate key="plugins.generic.editorialTimelineManager.cancel"}',
+		saving: '{translate key="plugins.generic.editorialTimelineManager.saving"}',
+		editDateTime: '{translate key="plugins.generic.editorialTimelineManager.editDateTime"}',
+		dateUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.dateUpdatedSuccess"}',
+		fileUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.fileUpdatedSuccess"}',
+		noteUpdatedSuccess: '{translate key="plugins.generic.editorialTimelineManager.noteUpdatedSuccess"}',
 		activityLogUpdated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successUpdated"}',
 		activityLogDeleted: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successDeleted"}',
 		activityLogCreated: '{translate key="plugins.generic.editorialTimelineManager.activityLog.successCreated"}',

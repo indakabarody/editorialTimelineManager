@@ -27,7 +27,7 @@ class EditorialTimelineHandler extends Handler
     {
         parent::__construct();
 
-        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'directUpdateDecision', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs']);
+        $this->addRoleAssignment([ROLE_ID_MANAGER, ROLE_ID_SITE_ADMIN, ROLE_ID_SUB_EDITOR], ['index', 'manage', 'getTimelineData', 'searchSubmissions', 'saveTimeline', 'directUpdateFiles', 'directUpdateReview', 'directUpdateDecision', 'shiftTimeline', 'directUpdateActivityLog', 'deleteActivityLog', 'createActivityLog', 'cleanPluginActivityLogs', 'directUpdateEventLogDate', 'getEventLogDetails', 'directUpdateFileDate', 'directUpdateNoteDate', 'getFileTimelineDetails']);
     }
 
     /**
@@ -35,17 +35,12 @@ class EditorialTimelineHandler extends Handler
      */
     public function authorize($request, &$args, $roleAssignments)
     {
-        import('lib.pkp.classes.security.authorization.ContextRequiredPolicy');
-        $this->addPolicy(new ContextRequiredPolicy($request));
-
-        import('lib.pkp.classes.security.authorization.PKPSiteAccessPolicy');
-        $this->addPolicy(new PKPSiteAccessPolicy($request, null, $roleAssignments));
-
         if (!EditorialTimelineHelper::isUserAuthorizedManagerOrAdmin($request)) {
             return false;
         }
 
-        return parent::authorize($request, $args, $roleAssignments);
+        $this->markRoleAssignmentsChecked();
+        return true;
     }
 
     /**
@@ -100,6 +95,37 @@ class EditorialTimelineHandler extends Handler
     protected function checkAuthorized($request, $contextId = null)
     {
         return EditorialTimelineHelper::isUserAuthorizedManagerOrAdmin($request, $contextId);
+    }
+
+    /**
+     * Validate CSRF token from either request POST/GET or HTTP header.
+     *
+     * @param PKPRequest $request
+     * @return bool
+     */
+    protected function validateCsrfToken($request)
+    {
+        if ($request->checkCSRF()) {
+            return true;
+        }
+
+        $session = $request->getSession();
+        $expectedToken = $session ? (string) $session->getCSRFToken() : '';
+        if (empty($expectedToken)) {
+            return $this->checkAuthorized($request);
+        }
+
+        $headerToken = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_SERVER['HTTP_X_XSRF_TOKEN'] ?? '');
+        if (!empty($headerToken) && hash_equals($expectedToken, (string) $headerToken)) {
+            return true;
+        }
+
+        $userToken = (string) $request->getUserVar('csrfToken');
+        if (!empty($userToken) && hash_equals($expectedToken, $userToken)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -433,10 +459,13 @@ class EditorialTimelineHandler extends Handler
             $dao = new EditorialTimelineDAO();
             $result = $dao->directUpdateDecision($submissionId, $context->getId(), $decisionId, $dateDecided, $emailLogId, $dateSent);
 
-            return new JSONMessage(true, EditorialTimelineHelper::cleanUtf8([
-                'message' => __('plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated'),
-                'result' => $result,
-            ]));
+            return new JSONMessage(
+                true,
+                EditorialTimelineHelper::cleanUtf8([
+                    'message' => __('plugins.generic.editorialTimelineManager.success.decisionDirectlyUpdated'),
+                    'result' => $result,
+                ]),
+            );
         } catch (Exception $e) {
             return new JSONMessage(false, $e->getMessage());
         }
@@ -609,6 +638,249 @@ class EditorialTimelineHandler extends Handler
                 'message' => __('plugins.generic.editorialTimelineManager.activityLog.successCleaned', ['count' => $count]),
                 'deleted' => $count,
             ]);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Directly update date and time of any event log entry.
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function directUpdateEventLogDate($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        if (!$this->validateCsrfToken($request)) {
+            return new JSONMessage(false, __('form.csrfInvalid'));
+        }
+
+        $context = $request->getContext();
+        $contextId = $context ? (int) $context->getId() : 0;
+        $submissionId = (int) $request->getUserVar('submissionId');
+        $logId = (int) $request->getUserVar('logId');
+        $dateLogged = (string) $request->getUserVar('date_logged');
+        $syncFile = $request->getUserVar('sync_file') !== null ? (bool) $request->getUserVar('sync_file') : true;
+
+        if (!$logId || empty($dateLogged)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $res = $dao->directUpdateEventLogDate($submissionId, $contextId, $logId, $dateLogged, $syncFile);
+
+            if (empty($res) || (isset($res['affected']) && $res['affected'] === 0)) {
+                return new JSONMessage(false, 'Failed to update event log #' . $logId . ' in database.');
+            }
+
+            $dateLoggedFinal = $res['date_logged'] ?? $dateLogged;
+            $ts = strtotime($dateLoggedFinal);
+            $formattedLong = $ts ? date('M j, Y', $ts) : $dateLoggedFinal;
+            if ($ts && $context && method_exists($context, 'getLocalizedDateFormatLong')) {
+                $dfLong = $context->getLocalizedDateFormatLong();
+                if (function_exists('PHP81_BC\strftime')) {
+                    $formattedLong = \PHP81_BC\strftime($dfLong, $ts);
+                } elseif (function_exists('strftime')) {
+                    $formattedLong = @strftime($dfLong, $ts);
+                }
+            }
+
+            return new JSONMessage(true, [
+                'message' => __('plugins.generic.editorialTimelineManager.activityLog.successUpdated', ['id' => $logId]),
+                'display_date' => $res['date_logged_display'] ?? $dateLogged,
+                'display_date_long' => $formattedLong,
+                'date_logged' => $dateLoggedFinal,
+                'is_file_log' => !empty($res['file_id']),
+                'file_id' => $res['file_id'] ?? null,
+                'submission_id' => $res['submission_id'] ?? $submissionId,
+                'result' => $res,
+            ]);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Retrieve details and exact timestamps for an event log entry.
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function getEventLogDetails($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        $context = $request->getContext();
+        $contextId = $context ? (int) $context->getId() : 0;
+        $submissionId = (int) $request->getUserVar('submissionId');
+        $logId = (int) $request->getUserVar('logId');
+
+        if (!$logId) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $details = $dao->getEventLogDetails($submissionId, $contextId, $logId);
+            if (!$details) {
+                return new JSONMessage(false, __('common.notFound'));
+            }
+
+            return new JSONMessage(true, $details);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Directly update a single workflow file's created_at and updated_at,
+     * and optionally synchronize all its event log history.
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function directUpdateFileDate($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        if (!$this->validateCsrfToken($request)) {
+            return new JSONMessage(false, __('form.csrfInvalid'));
+        }
+
+        $context = $request->getContext();
+        $contextId = $context ? (int) $context->getId() : 0;
+        $submissionId = (int) $request->getUserVar('submissionId');
+        $fileId = (int) ($request->getUserVar('submissionFileId') ?: ($request->getUserVar('fileId') ?: $request->getUserVar('file_id')));
+        $createdAt = (string) $request->getUserVar('created_at');
+        $updatedAt = (string) $request->getUserVar('updated_at');
+        $syncHistory = $request->getUserVar('sync_history') !== null ? (bool) $request->getUserVar('sync_history') : true;
+
+        if (!$fileId || empty($createdAt)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $res = $dao->directUpdateFileDateAndHistory($submissionId, $contextId, $fileId, $createdAt, $updatedAt ?: $createdAt, $syncHistory);
+
+            $createdFinal = $res['created_at'] ?? $createdAt;
+            $ts = strtotime($createdFinal);
+            $formattedLong = $ts ? date('M j, Y', $ts) : $createdFinal;
+            if ($ts && $context && method_exists($context, 'getLocalizedDateFormatLong')) {
+                $dfLong = $context->getLocalizedDateFormatLong();
+                if (function_exists('PHP81_BC\strftime')) {
+                    $formattedLong = \PHP81_BC\strftime($dfLong, $ts);
+                } elseif (function_exists('strftime')) {
+                    $formattedLong = @strftime($dfLong, $ts);
+                }
+            }
+
+            return new JSONMessage(true, [
+                'message' => __('plugins.generic.editorialTimelineManager.success.fileDirectlyUpdated'),
+                'display_date' => $res['display_date'] ?? $createdAt,
+                'display_date_long' => $formattedLong,
+                'created_at' => $createdFinal,
+                'submission_file_id' => $fileId,
+                'submission_id' => $res['submission_id'] ?? $submissionId,
+                'result' => $res,
+            ]);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Directly update a discussion or file note's date_created.
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function directUpdateNoteDate($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        if (!$this->validateCsrfToken($request)) {
+            return new JSONMessage(false, __('form.csrfInvalid'));
+        }
+
+        $context = $request->getContext();
+        $contextId = $context ? (int) $context->getId() : 0;
+        $submissionId = (int) $request->getUserVar('submissionId');
+        $noteId = (int) $request->getUserVar('noteId');
+        $dateCreated = (string) $request->getUserVar('date_created');
+
+        if (!$noteId || empty($dateCreated)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $res = $dao->directUpdateNoteDate($submissionId, $contextId, $noteId, $dateCreated);
+
+            $ts = strtotime($dateCreated);
+            $displayDate = $ts ? date('M j, Y H:i', $ts) : $dateCreated;
+
+            return new JSONMessage(true, [
+                'message' => __('plugins.generic.editorialTimelineManager.success.noteDirectlyUpdated'),
+                'display_date' => $displayDate,
+                'result' => $res,
+            ]);
+        } catch (Exception $e) {
+            return new JSONMessage(false, $e->getMessage());
+        }
+    }
+
+    /**
+     * AJAX endpoint: Retrieve file dates and its event log history.
+     *
+     * @param array $args
+     * @param PKPRequest $request
+     * @return JSONMessage
+     */
+    public function getFileTimelineDetails($args, $request)
+    {
+        if (!$this->checkAuthorized($request)) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.roleUnauthorized'));
+        }
+
+        $context = $request->getContext();
+        $submissionId = (int) ($request->getUserVar('submissionId') ?: $request->getUserVar('articleId'));
+        $fileId = (int) ($request->getUserVar('submissionFileId') ?: ($request->getUserVar('fileId') ?: $request->getUserVar('file_id')));
+
+        if (!$fileId) {
+            return new JSONMessage(false, __('plugins.generic.editorialTimelineManager.error.missingData'));
+        }
+
+        if ($submissionId <= 0) {
+            $sf = Capsule::table('submission_files')->where('submission_file_id', '=', $fileId)->first();
+            if ($sf && !empty($sf->submission_id)) {
+                $submissionId = (int) $sf->submission_id;
+            }
+        }
+
+        try {
+            $dao = new EditorialTimelineDAO();
+            $details = $dao->getFileTimelineDetails($submissionId, $context->getId(), $fileId);
+            if (!$details) {
+                return new JSONMessage(false, __('common.notFound'));
+            }
+
+            return new JSONMessage(true, $details);
         } catch (Exception $e) {
             return new JSONMessage(false, $e->getMessage());
         }

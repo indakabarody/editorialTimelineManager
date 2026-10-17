@@ -565,6 +565,12 @@ class EditorialTimelineHelper
         // Fallback: If contextId is not available from request context, try getting from submission in request
         if ($contextId <= 0 && $request) {
             $submissionId = (int) ($request->getUserVar('submissionId') ?: $request->getUserVar('articleId'));
+            if (!$submissionId) {
+                $args = (array) $request->getRequestedArgs();
+                if (!empty($args[0]) && is_numeric($args[0])) {
+                    $submissionId = (int) $args[0];
+                }
+            }
             if ($submissionId > 0) {
                 $submissionDao = DAORegistry::getDAO('SubmissionDAO');
                 $submission = $submissionDao ? $submissionDao->getById($submissionId) : null;
@@ -574,13 +580,37 @@ class EditorialTimelineHelper
             }
         }
 
-        // 3. Specifically check whether the user is enrolled as Journal Manager (and NOT Journal Editor or Production Editor)
+        // 3. Check Journal Manager and Editorial roles in context
+        if ($roleDao) {
+            if ($contextId > 0) {
+                if ($roleDao->userHasRole($contextId, $user->getId(), ROLE_ID_MANAGER) ||
+                    $roleDao->userHasRole($contextId, $user->getId(), ROLE_ID_SITE_ADMIN) ||
+                    $roleDao->userHasRole($contextId, $user->getId(), ROLE_ID_SUB_EDITOR)) {
+                    return true;
+                }
+            } else {
+                if ($roleDao->userHasRole(CONTEXT_ID_NONE, $user->getId(), ROLE_ID_SITE_ADMIN)) {
+                    return true;
+                }
+            }
+        }
+
+        if (method_exists($user, 'hasRole')) {
+            $allowedRoles = [ROLE_ID_SITE_ADMIN, ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR];
+            if ($contextId > 0 && $user->hasRole($allowedRoles, $contextId)) {
+                return true;
+            }
+            if ($user->hasRole([ROLE_ID_SITE_ADMIN], $siteContextId)) {
+                return true;
+            }
+        }
+
+        // 4. Check user groups for Manager/Editor privileges
         return self::isUserSpecificallyJournalManager($user, $contextId);
     }
 
     /**
-     * Check whether a user belongs specifically to the Journal Manager user group
-     * (and strictly exclude Journal Editor, Production Editor, Section Editor, etc.).
+     * Check whether a user belongs to the Journal Manager or Editor user group.
      *
      * @param PKPUser $user
      * @param int $contextId (0 for any context)
@@ -597,97 +627,22 @@ class EditorialTimelineHelper
 
         $userGroupDao = DAORegistry::getDAO('UserGroupDAO');
         if ($userGroupDao) {
-            $params = [$userId];
-            $sql =
-                'SELECT ug.user_group_id, ug.role_id, ug.context_id,
-                           ugs_key.setting_value AS name_locale_key,
-                           ugs_name.setting_value AS group_name,
-                           ugs_abbrev.setting_value AS group_abbrev
-                    FROM user_groups ug
-                    JOIN user_user_groups uug ON (ug.user_group_id = uug.user_group_id)
-                    LEFT JOIN user_group_settings ugs_key ON (ugs_key.user_group_id = ug.user_group_id AND ugs_key.setting_name = \'nameLocaleKey\')
-                    LEFT JOIN user_group_settings ugs_name ON (ugs_name.user_group_id = ug.user_group_id AND ugs_name.setting_name = \'name\')
-                    LEFT JOIN user_group_settings ugs_abbrev ON (ugs_abbrev.user_group_id = ug.user_group_id AND ugs_abbrev.setting_name = \'abbrev\')
-                    WHERE uug.user_id = ? AND ug.role_id = ' . (int) ROLE_ID_MANAGER;
-
-            if ($contextId > 0) {
-                $sql .= ' AND ug.context_id = ?';
-                $params[] = $contextId;
-            }
-
-            try {
-                $result = $userGroupDao->retrieve($sql, $params);
-                if ($result) {
-                    foreach ($result as $row) {
-                        $key = strtolower(trim((string) ($row->name_locale_key ?? '')));
-                        $name = strtolower(trim((string) ($row->group_name ?? '')));
-                        $abbrev = strtoupper(trim((string) ($row->group_abbrev ?? '')));
-
-                        // Explicit exclusions: Journal Editor, Production Editor, Section Editor
-                        if ($key === 'default.groups.name.editor' || $key === 'default.groups.name.productioneditor' || $key === 'default.groups.name.sectioneditor' || $key === 'default.groups.name.guesteditor' || $abbrev === 'JE' || $abbrev === 'PE' || $abbrev === 'SE' || $abbrev === 'GE') {
-                            continue;
-                        }
-
-                        // If group name has 'editor' without 'manager'/'manajer', exclude it
-                        if (strpos($name, 'editor') !== false && strpos($name, 'manager') === false && strpos($name, 'manajer') === false) {
-                            continue;
-                        }
-
-                        // Positive matches for Journal Manager
-                        if ($key === 'default.groups.name.manager' || $abbrev === 'JM' || strpos($name, 'journal manager') !== false || strpos($name, 'manajer jurnal') !== false || strpos($name, 'pengelola jurnal') !== false || strpos($name, 'manager') !== false || strpos($name, 'manajer') !== false) {
+            $allowedRoleIds = [(int) ROLE_ID_MANAGER, (int) ROLE_ID_SUB_EDITOR, (int) ROLE_ID_SITE_ADMIN];
+            if ($contextId > 0 && method_exists($userGroupDao, 'userInGroup')) {
+                // Check if user has groups in this context with manager role
+                $userGroups = method_exists($userGroupDao, 'getByUserId') ? $userGroupDao->getByUserId($userId, $contextId) : null;
+                if ($userGroups) {
+                    while ($ug = $userGroups->next()) {
+                        if (in_array((int) $ug->getRoleId(), $allowedRoleIds)) {
                             return true;
-                        }
-
-                        // If key is empty and name doesn't specify editor, check assigned workflow stages
-                        if (method_exists($userGroupDao, 'getAssignedStagesByUserGroupId')) {
-                            $stages = $userGroupDao->getAssignedStagesByUserGroupId((int) $row->context_id, (int) $row->user_group_id);
-                            if (empty($stages)) {
-                                return true;
-                            }
                         }
                     }
                 }
-            } catch (Exception $e) {
-                // Fallback to ORM
-            }
-        }
-
-        // ORM Fallback
-        if ($userGroupDao && method_exists($userGroupDao, 'getByUserId')) {
-            $userGroups = $contextId > 0 ? $userGroupDao->getByUserId($userId, $contextId) : $userGroupDao->getByUserId($userId);
-            if ($userGroups) {
-                while ($ug = $userGroups->next()) {
-                    if ((int) $ug->getRoleId() !== ROLE_ID_MANAGER) {
-                        continue;
-                    }
-
-                    $key = strtolower(trim((string) $ug->getData('nameLocaleKey')));
-                    if (empty($key) && method_exists($userGroupDao, 'getSetting')) {
-                        $key = strtolower(trim((string) $userGroupDao->getSetting($ug->getId(), 'nameLocaleKey')));
-                    }
-
-                    if ($key === 'default.groups.name.editor' || $key === 'default.groups.name.productioneditor' || $key === 'default.groups.name.sectioneditor' || $key === 'default.groups.name.guesteditor') {
-                        continue;
-                    }
-
-                    $locName = strtolower(trim((string) $ug->getLocalizedName()));
-                    $locAbbrev = strtoupper(trim((string) $ug->getLocalizedAbbrev()));
-
-                    if ($locAbbrev === 'JE' || $locAbbrev === 'PE' || $locAbbrev === 'SE' || $locAbbrev === 'GE') {
-                        continue;
-                    }
-
-                    if (strpos($locName, 'editor') !== false && strpos($locName, 'manager') === false && strpos($locName, 'manajer') === false) {
-                        continue;
-                    }
-
-                    if ($key === 'default.groups.name.manager' || $locAbbrev === 'JM' || strpos($locName, 'journal manager') !== false || strpos($locName, 'manajer jurnal') !== false || strpos($locName, 'manager') !== false || strpos($locName, 'manajer') !== false) {
-                        return true;
-                    }
-
-                    if (method_exists($userGroupDao, 'getAssignedStagesByUserGroupId')) {
-                        $stages = $userGroupDao->getAssignedStagesByUserGroupId((int) $ug->getContextId(), (int) $ug->getId());
-                        if (empty($stages)) {
+            } elseif (method_exists($userGroupDao, 'getByUserId')) {
+                $userGroups = $userGroupDao->getByUserId($userId);
+                if ($userGroups) {
+                    while ($ug = $userGroups->next()) {
+                        if (in_array((int) $ug->getRoleId(), $allowedRoleIds)) {
                             return true;
                         }
                     }
@@ -698,3 +653,4 @@ class EditorialTimelineHelper
         return false;
     }
 }
+

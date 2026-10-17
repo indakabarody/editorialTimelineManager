@@ -349,16 +349,27 @@
 										/>
 									</td>
 									<td style="text-align: center;">
-										<button
-											type="button"
-											class="etm-copy-date-btn"
-											title="{translate key="plugins.generic.editorialTimelineManager.copyDateToOthers"}"
-											data-created="{EditorialTimelineHelper::toHtmlDatetime($file.created_at)}"
-											data-stage="{$file.file_stage}"
-										>
-											<i class="fa fa-clone"></i>
-											<span>{translate key="plugins.generic.editorialTimelineManager.copy"}</span>
-										</button>
+										<div class="etm-row-btn-group">
+											<button
+												type="button"
+												class="pkp_button etm-direct-file-save-btn"
+												title="{translate key="plugins.generic.editorialTimelineManager.save"}"
+												data-file-id="{$file.submission_file_id}"
+											>
+												<i class="fa fa-save"></i>
+												<span>{translate key="plugins.generic.editorialTimelineManager.save"}</span>
+											</button>
+											<button
+												type="button"
+												class="etm-copy-date-btn"
+												title="{translate key="plugins.generic.editorialTimelineManager.copyDateToOthers"}"
+												data-created="{EditorialTimelineHelper::toHtmlDatetime($file.created_at)}"
+												data-stage="{$file.file_stage}"
+											>
+												<i class="fa fa-clone"></i>
+												<span>{translate key="plugins.generic.editorialTimelineManager.copy"}</span>
+											</button>
+										</div>
 									</td>
 								</tr>
 							{/foreach}
@@ -745,6 +756,12 @@
 							<button type="button" class="etm-filter-chip etm-log-filter-chip active" data-filter="all">
 								{translate key="plugins.generic.editorialTimelineManager.activityLog.allLogs"}
 							</button>
+							<button type="button" class="etm-filter-chip etm-log-filter-chip" data-filter="submission">
+								{translate key="plugins.generic.editorialTimelineManager.tab.overview"}
+							</button>
+							<button type="button" class="etm-filter-chip etm-log-filter-chip" data-filter="files">
+								{translate key="plugins.generic.editorialTimelineManager.tab.files"}
+							</button>
 							<button type="button" class="etm-filter-chip etm-log-filter-chip" data-filter="plugin">
 								{translate key="plugins.generic.editorialTimelineManager.activityLog.pluginLogs"}
 							</button>
@@ -801,12 +818,17 @@
 							</thead>
 							<tbody id="etmLogTbody_{$submissionId}">
 								{foreach from=$timeline.activity_logs item=log}
-									<tr class="etm-log-row {if $log.is_plugin_log}etm-log-is-plugin{/if}" id="etmLogRow_{$log.log_id}" data-log-id="{$log.log_id}">
+									<tr class="etm-log-row {if $log.is_plugin_log}etm-log-is-plugin{/if} {if $log.is_file_log}etm-log-is-file etm-file-stage-{$log.file_stage}{else}etm-log-is-submission{/if}" id="etmLogRow_{$log.log_id}" data-log-id="{$log.log_id}" data-is-file="{if $log.is_file_log}1{else}0{/if}" data-assoc-type="{$log.assoc_type}" data-assoc-id="{$log.assoc_id}">
 										<td>
 											<strong class="etm-log-id">#{$log.log_id}</strong>
 											{if $log.is_plugin_log}
 												<span class="etm-badge etm-badge-warning" style="margin-top: 4px; display: inline-block;">
 													{translate key="plugins.generic.editorialTimelineManager.activityLog.pluginLogBadge"}
+												</span>
+											{/if}
+											{if $log.is_file_log}
+												<span class="etm-stage-badge etm-badge-stage-{$log.file_stage}" style="margin-top: 4px; display: inline-block; font-size: 10px;">
+													{$log.file_stage_name|escape}
 												</span>
 											{/if}
 										</td>
@@ -834,6 +856,11 @@
 											</select>
 										</td>
 										<td>
+											{if $log.is_file_log && $log.file_meta}
+												<div class="etm-file-log-tag" style="margin-bottom: 4px; font-size: 11px; color: #0284c7; font-weight: 600;">
+													<i class="fa fa-file-text-o"></i> {$log.file_meta.filename|escape} (#{$log.assoc_id})
+												</div>
+											{/if}
 											<textarea
 												class="etm-input etm-log-message"
 												name="activity_logs[{$log.log_id}][message]"

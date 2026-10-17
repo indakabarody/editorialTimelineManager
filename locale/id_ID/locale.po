@@ -614,3 +614,27 @@ msgstr "Tanggal keputusan dan email notifikasi penulis berhasil diperbarui di da
 msgid "plugins.generic.editorialTimelineManager.error.updateDecision"
 msgstr "Gagal memperbarui tanggal keputusan dan notifikasi di database."
 
+msgid "plugins.generic.editorialTimelineManager.editDateTime"
+msgstr "Edit Tanggal & Waktu"
+
+msgid "plugins.generic.editorialTimelineManager.dateUpdatedSuccess"
+msgstr "Tanggal dan waktu berhasil diperbarui!"
+
+msgid "plugins.generic.editorialTimelineManager.fileUpdatedSuccess"
+msgstr "Waktu berkas dan riwayat berhasil diperbarui!"
+
+msgid "plugins.generic.editorialTimelineManager.noteUpdatedSuccess"
+msgstr "Tanggal dan waktu catatan berhasil diperbarui!"
+
+msgid "plugins.generic.editorialTimelineManager.quickEditFileDate"
+msgstr "Edit Cepat Tanggal & Waktu Berkas"
+
+msgid "plugins.generic.editorialTimelineManager.historyAndFileDateUpdated"
+msgstr "Log riwayat dan stempel waktu berkas berhasil disinkronkan!"
+
+msgid "plugins.generic.editorialTimelineManager.cancel"
+msgstr "Batal"
+
+msgid "plugins.generic.editorialTimelineManager.saving"
+msgstr "Menyimpan..."
+

@@ -614,3 +614,27 @@ msgstr "Decision date and author notification email updated successfully in data
 msgid "plugins.generic.editorialTimelineManager.error.updateDecision"
 msgstr "Failed to update decision date and notification in database."
 
+msgid "plugins.generic.editorialTimelineManager.editDateTime"
+msgstr "Edit Date & Time"
+
+msgid "plugins.generic.editorialTimelineManager.dateUpdatedSuccess"
+msgstr "Date and time updated successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.fileUpdatedSuccess"
+msgstr "File timestamp and history updated successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.noteUpdatedSuccess"
+msgstr "Note date and time updated successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.quickEditFileDate"
+msgstr "Quick Edit File Date & Time"
+
+msgid "plugins.generic.editorialTimelineManager.historyAndFileDateUpdated"
+msgstr "Event log and associated file timestamp synchronized successfully!"
+
+msgid "plugins.generic.editorialTimelineManager.cancel"
+msgstr "Cancel"
+
+msgid "plugins.generic.editorialTimelineManager.saving"
+msgstr "Saving..."
+

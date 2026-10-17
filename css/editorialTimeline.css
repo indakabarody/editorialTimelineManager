@@ -1466,3 +1466,249 @@ textarea.etm-input {
 	text-align: center;
 	color: var(--etm-text-muted);
 }
+
+/* ============================================================== */
+/* Information Center & Workflow Grid Inline Date/Time Editors   */
+/* ============================================================== */
+.etm-inline-log-edit-btn,
+.etm-inline-note-edit-btn,
+.etm-workflow-quick-edit-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 22px !important;
+	height: 22px !important;
+	min-height: 22px !important;
+	max-height: 22px !important;
+	padding: 0 !important;
+	margin-left: 6px !important;
+	vertical-align: middle !important;
+	border-radius: 4px !important;
+	border: 1px solid var(--etm-border) !important;
+	background: #ffffff !important;
+	color: var(--etm-primary) !important;
+	cursor: pointer !important;
+	font-size: 11px !important;
+	line-height: 1 !important;
+	transition: all 0.15s ease-in-out !important;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.etm-inline-log-edit-btn:hover,
+.etm-inline-note-edit-btn:hover,
+.etm-workflow-quick-edit-btn:hover {
+	background: var(--etm-primary-light) !important;
+	border-color: var(--etm-primary) !important;
+	color: var(--etm-primary-dark) !important;
+	transform: scale(1.08);
+}
+
+.etm-inline-log-edit-btn i.fa,
+.etm-inline-note-edit-btn i.fa,
+.etm-workflow-quick-edit-btn i.fa {
+	margin: 0 !important;
+	padding: 0 !important;
+	font-size: 10px !important;
+	line-height: 1 !important;
+}
+
+.etm-inline-log-editor,
+.etm-inline-note-editor {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 4px !important;
+	background: #ffffff !important;
+	padding: 2px 4px !important;
+	border: 1px solid var(--etm-primary) !important;
+	border-radius: 4px !important;
+	box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+	vertical-align: middle !important;
+	z-index: 10;
+	position: relative;
+}
+
+.etm-inline-log-input,
+.etm-inline-note-input {
+	height: 26px !important;
+	padding: 2px 6px !important;
+	font-size: 11px !important;
+	font-family: inherit !important;
+	border: 1px solid var(--etm-border) !important;
+	border-radius: 3px !important;
+	color: var(--etm-text) !important;
+	background: #ffffff !important;
+	outline: none !important;
+	line-height: 1 !important;
+	box-sizing: border-box !important;
+}
+
+.etm-inline-log-input:focus,
+.etm-inline-note-input:focus {
+	border-color: var(--etm-primary) !important;
+	box-shadow: 0 0 0 2px rgba(0, 103, 152, 0.2) !important;
+}
+
+.etm-inline-log-actions,
+.etm-inline-note-actions {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 3px !important;
+}
+
+.etm-inline-log-save-btn,
+.etm-inline-note-save-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 24px !important;
+	height: 24px !important;
+	min-height: 24px !important;
+	max-height: 24px !important;
+	padding: 0 !important;
+	background: #16a34a !important;
+	color: #ffffff !important;
+	border: none !important;
+	border-radius: 3px !important;
+	cursor: pointer !important;
+	font-size: 11px !important;
+	transition: background 0.15s ease !important;
+}
+
+.etm-inline-log-save-btn:hover,
+.etm-inline-note-save-btn:hover {
+	background: #15803d !important;
+}
+
+.etm-inline-log-cancel-btn,
+.etm-inline-note-cancel-btn {
+	display: inline-flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	width: 24px !important;
+	height: 24px !important;
+	min-height: 24px !important;
+	max-height: 24px !important;
+	padding: 0 !important;
+	background: #e2e8f0 !important;
+	color: #475569 !important;
+	border: none !important;
+	border-radius: 3px !important;
+	cursor: pointer !important;
+	font-size: 11px !important;
+	transition: background 0.15s ease !important;
+}
+
+.etm-inline-log-cancel-btn:hover,
+.etm-inline-note-cancel-btn:hover {
+	background: #cbd5e1 !important;
+	color: #1e293b !important;
+}
+
+/* Flash animation for edited rows / cells */
+@keyframes etmFlashPulse {
+	0% {
+		background-color: #bbf7d0;
+		outline: 2px solid #22c55e;
+	}
+	50% {
+		background-color: #86efac;
+		outline: 2px solid #16a34a;
+	}
+	100% {
+		background-color: transparent;
+		outline: 2px solid transparent;
+	}
+}
+
+.etm-flash-success {
+	animation: etmFlashPulse 1.4s ease-out !important;
+}
+
+/* File Badges in Activity Log */
+.etm-file-log-tag {
+	display: inline-block;
+	background: #f0f9ff;
+	color: #0369a1;
+	border: 1px solid #bae6fd;
+	border-radius: 4px;
+	padding: 2px 7px;
+	font-size: 11px;
+	font-weight: 600;
+	margin-bottom: 4px;
+	max-width: 100%;
+	word-break: break-all;
+}
+
+.etm-file-log-tag i.fa {
+	margin-right: 3px;
+	color: #0284c7;
+}
+
+/* Direct File Save Button in Table */
+.etm-direct-file-save-btn {
+	background: #ffffff !important;
+	border: 1px solid var(--etm-border) !important;
+	color: var(--etm-primary) !important;
+	padding: 4px 8px !important;
+	font-size: 11px !important;
+	border-radius: 4px !important;
+	cursor: pointer !important;
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 4px !important;
+	transition: all 0.15s ease !important;
+}
+
+.etm-direct-file-save-btn:hover {
+	background: var(--etm-primary-light) !important;
+	border-color: var(--etm-primary) !important;
+	color: var(--etm-primary-dark) !important;
+}
+
+/* Global Floating Toast Notification */
+.etm-global-toast {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	background: #0f172a;
+	color: #ffffff;
+	padding: 12px 18px;
+	border-radius: 8px;
+	box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+	font-size: 13px;
+	font-weight: 600;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	z-index: 999999;
+	opacity: 0;
+	transform: translateY(15px);
+	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	pointer-events: none;
+}
+
+.etm-global-toast.etm-toast-show {
+	opacity: 1;
+	transform: translateY(0);
+	pointer-events: auto;
+}
+
+.etm-global-toast.etm-toast-success {
+	border-left: 4px solid #22c55e;
+}
+
+.etm-global-toast.etm-toast-error {
+	border-left: 4px solid #ef4444;
+}
+
+.etm-global-toast i.fa {
+	font-size: 16px;
+}
+
+.etm-global-toast.etm-toast-success i.fa {
+	color: #22c55e;
+}
+
+.etm-global-toast.etm-toast-error i.fa {
+	color: #ef4444;
+}

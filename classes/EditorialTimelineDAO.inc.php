@@ -15,6 +15,25 @@ import('plugins.generic.editorialTimelineManager.classes.EditorialTimelineHelper
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
+if (!defined('ASSOC_TYPE_SUBMISSION')) {
+    define('ASSOC_TYPE_SUBMISSION', 0x0100009);
+}
+if (!defined('ASSOC_TYPE_SUBMISSION_FILE')) {
+    define('ASSOC_TYPE_SUBMISSION_FILE', 0x0000203);
+}
+if (!defined('ASSOC_TYPE_QUERY')) {
+    define('ASSOC_TYPE_QUERY', 0x010000a);
+}
+if (!defined('ASSOC_TYPE_NOTE')) {
+    define('ASSOC_TYPE_NOTE', 0x0000208);
+}
+if (!defined('SUBMISSION_LOG_FILE_UPLOAD')) {
+    define('SUBMISSION_LOG_FILE_UPLOAD', 0x50000001);
+}
+if (!defined('SUBMISSION_LOG_FILE_REVISION_UPLOAD')) {
+    define('SUBMISSION_LOG_FILE_REVISION_UPLOAD', 0x50000008);
+}
+
 class EditorialTimelineDAO extends DAO
 {
     /**
@@ -599,6 +618,8 @@ class EditorialTimelineDAO extends DAO
                         $bulkQuery->where('file_stage', '=', (int) $targetStage);
                     }
 
+                    $targetFileIds = $bulkQuery->pluck('submission_file_id')->toArray();
+
                     $bulkUpdateData = ['created_at' => $bulkDate];
                     if ($syncUpdated) {
                         $bulkUpdateData['updated_at'] = $bulkDate;
@@ -606,6 +627,13 @@ class EditorialTimelineDAO extends DAO
 
                     $count = $bulkQuery->update($bulkUpdateData);
                     $affected['files'] += $count;
+
+                    if (!empty($targetFileIds)) {
+                        Capsule::table('event_log')
+                            ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION_FILE)
+                            ->whereIn('assoc_id', $targetFileIds)
+                            ->update(['date_logged' => $bulkDate]);
+                    }
                 }
             }
 
@@ -623,6 +651,13 @@ class EditorialTimelineDAO extends DAO
                     if (!empty($fileUpdates)) {
                         $c = Capsule::table('submission_files')->where('submission_file_id', '=', (int) $fileId)->where('submission_id', '=', $submissionId)->update($fileUpdates);
                         $affected['files'] += $c;
+
+                        if (isset($fileUpdates['created_at'])) {
+                            Capsule::table('event_log')
+                                ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION_FILE)
+                                ->where('assoc_id', '=', (int) $fileId)
+                                ->update(['date_logged' => $fileUpdates['created_at']]);
+                        }
                     }
                 }
             }
@@ -773,12 +808,38 @@ class EditorialTimelineDAO extends DAO
                     }
 
                     if (!empty($logUpdates)) {
-                        $c = Capsule::table('event_log')
-                            ->where('log_id', '=', (int) $logId)
-                            ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION)
-                            ->where('assoc_id', '=', $submissionId)
-                            ->update($logUpdates);
-                        $affected['activity_logs'] += $c;
+                        $logEntry = Capsule::table('event_log')->where('log_id', '=', (int) $logId)->first();
+                        if ($logEntry) {
+                            $valid = false;
+                            $assocFileId = null;
+                            if ($logEntry->assoc_type == ASSOC_TYPE_SUBMISSION && (int) $logEntry->assoc_id === $submissionId) {
+                                $valid = true;
+                            } elseif ($logEntry->assoc_type == ASSOC_TYPE_SUBMISSION_FILE) {
+                                $fileOwner = Capsule::table('submission_files')
+                                    ->where('submission_file_id', '=', (int) $logEntry->assoc_id)
+                                    ->where('submission_id', '=', $submissionId)
+                                    ->exists();
+                                if ($fileOwner) {
+                                    $valid = true;
+                                    $assocFileId = (int) $logEntry->assoc_id;
+                                    if (isset($logUpdates['date_logged'])) {
+                                        Capsule::table('submission_files')
+                                            ->where('submission_file_id', '=', $assocFileId)
+                                            ->update([
+                                                'created_at' => $logUpdates['date_logged'],
+                                                'updated_at' => $logUpdates['date_logged'],
+                                            ]);
+                                    }
+                                }
+                            }
+
+                            if ($valid) {
+                                $c = Capsule::table('event_log')
+                                    ->where('log_id', '=', (int) $logId)
+                                    ->update($logUpdates);
+                                $affected['activity_logs'] += $c;
+                            }
+                        }
                     }
                 }
             }
@@ -822,12 +883,24 @@ class EditorialTimelineDAO extends DAO
             $query->where('file_stage', '=', (int) $targetStage);
         }
 
+        $targetFileIds = $query->pluck('submission_file_id')->toArray();
+
         $updateData = ['created_at' => $dbDate];
         if ($syncUpdated) {
             $updateData['updated_at'] = $dbDate;
         }
 
-        return $query->update($updateData);
+        $affected = $query->update($updateData);
+
+        // Synchronize all associated event_logs for these files
+        if (!empty($targetFileIds)) {
+            Capsule::table('event_log')
+                ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION_FILE)
+                ->whereIn('assoc_id', $targetFileIds)
+                ->update(['date_logged' => $dbDate]);
+        }
+
+        return $affected;
     }
 
     /**
@@ -1068,170 +1141,172 @@ class EditorialTimelineDAO extends DAO
     public function getActivityLogs($submissionId, $contextId)
     {
         $submissionId = (int) $submissionId;
+        $contextId = (int) $contextId;
 
-        import('lib.pkp.classes.log.SubmissionEventLogDAO');
-        $submissionEventLogDao = DAORegistry::getDAO('SubmissionEventLogDAO');
         $userDao = DAORegistry::getDAO('UserDAO');
 
-        $logs = [];
+        // 1. Get all submission files for stage and filename lookup
+        $fileRows = Capsule::table('submission_files as sf')
+            ->where('sf.submission_id', '=', $submissionId)
+            ->select(['sf.submission_file_id', 'sf.file_stage', 'sf.created_at', 'sf.updated_at'])
+            ->get();
 
-        try {
-            $eventLogEntries = $submissionEventLogDao ? $submissionEventLogDao->getBySubmissionId($submissionId) : null;
-            if ($eventLogEntries) {
-                while ($entry = $eventLogEntries->next()) {
-                    $userId = (int) $entry->getUserId();
-                    $user = $userDao ? $userDao->getById($userId) : null;
-                    $username = $user ? $user->getUsername() : '';
-                    $userFullName = $user ? $user->getFullName() : ($entry->getUserFullName() ?: '');
+        $fileMap = [];
+        $fileIds = [];
+        foreach ($fileRows as $f) {
+            $fid = (int) $f->submission_file_id;
+            $fileIds[] = $fid;
+            $fileMap[$fid] = [
+                'file_stage' => (int) $f->file_stage,
+                'file_stage_name' => EditorialTimelineHelper::getFileStageName($f->file_stage),
+                'created_at' => $f->created_at,
+                'updated_at' => $f->updated_at,
+            ];
+        }
 
-                    if (empty($username) && $userId > 0) {
-                        $uRow = Capsule::table('users')->where('user_id', '=', $userId)->first();
-                        if ($uRow) {
-                            $username = $uRow->username;
-                        }
-                    }
-
-                    $dateLogged = $entry->getDateLogged();
-                    $dateLoggedFormatted = '';
-                    if (!empty($dateLogged)) {
-                        $ts = strtotime($dateLogged);
-                        if ($ts) {
-                            $dateLoggedFormatted = date('Y-m-d\TH:i', $ts);
-                        }
-                    }
-
-                    $rawMessage = (string) $entry->getMessage();
-                    $isTranslated = (int) $entry->getIsTranslated();
-                    $translatedMessage = $entry->getTranslatedMessage();
-                    if (empty($translatedMessage)) {
-                        $translatedMessage = $rawMessage;
-                    }
-
-                    // Clean any untranslated wrapper ##...## if the string is plain text
-                    while (preg_match('/^##(.*)##$/s', $translatedMessage, $m)) {
-                        $inner = trim($m[1]);
-                        if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
-                            $translatedMessage = $inner;
-                        } else {
-                            break;
-                        }
-                    }
-                    while (preg_match('/^##(.*)##$/s', $rawMessage, $m)) {
-                        $inner = trim($m[1]);
-                        if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
-                            $rawMessage = $inner;
-                        } else {
-                            break;
-                        }
-                    }
-
-                    // Auto-heal existing records in DB that were saved with is_translated = 0 on literal sentences
-                    if ($isTranslated === 0 && (strpos($rawMessage, ' ') !== false || preg_match('/^##.*##$/s', $entry->getMessage()))) {
-                        try {
-                            Capsule::table('event_log')
-                                ->where('log_id', '=', (int) $entry->getId())
-                                ->update([
-                                    'message' => $translatedMessage,
-                                    'is_translated' => 1,
-                                ]);
-                            $isTranslated = 1;
-                        } catch (Exception $e) {
-                        }
-                    }
-
-                    $isPluginLog = strpos($rawMessage, 'plugins.generic.editorialTimelineManager') !== false || strpos($translatedMessage, 'Editorial workflow timeline dates were modified') !== false;
-
-                    $logs[] = [
-                        'log_id' => (int) $entry->getId(),
-                        'user_id' => $userId,
-                        'username' => $username,
-                        'user_full_name' => $userFullName ?: ($username ?: 'User #' . $userId),
-                        'date_logged' => $dateLogged,
-                        'date_logged_formatted' => $dateLoggedFormatted,
-                        'event_type' => (int) $entry->getEventType(),
-                        'message' => $rawMessage,
-                        'display_message' => $translatedMessage,
-                        'is_translated' => $isTranslated,
-                        'is_plugin_log' => $isPluginLog,
-                        'params' => $entry->getParams(),
-                    ];
-                }
-            }
-        } catch (Exception $e) {
-            // Fallback via Capsule query if DAO throws
-            $dbRows = Capsule::table('event_log as el')
-                ->leftJoin('users as u', 'el.user_id', '=', 'u.user_id')
-                ->where('el.assoc_type', '=', ASSOC_TYPE_SUBMISSION)
-                ->where('el.assoc_id', '=', $submissionId)
-                ->select(['el.*', 'u.username'])
-                ->orderBy('el.date_logged', 'desc')
+        // Fetch localized filenames
+        $fileNames = [];
+        if (!empty($fileIds)) {
+            $currLoc = AppLocale::getLocale();
+            $fnRows = Capsule::table('submission_file_settings')
+                ->whereIn('submission_file_id', $fileIds)
+                ->where('setting_name', '=', 'name')
                 ->get();
-
-            foreach ($dbRows as $row) {
-                $rawMsg = (string) $row->message;
-                $isTrans = (int) $row->is_translated;
-                $displayMsg = $isTrans ? $rawMsg : __($rawMsg);
-                if (empty($displayMsg)) {
-                    $displayMsg = $rawMsg;
+            foreach ($fnRows as $fn) {
+                if (!isset($fileNames[$fn->submission_file_id]) || $fn->locale === $currLoc) {
+                    $fileNames[$fn->submission_file_id] = $fn->setting_value;
                 }
-                while (preg_match('/^##(.*)##$/s', $displayMsg, $m)) {
-                    $inner = trim($m[1]);
-                    if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
-                        $displayMsg = $inner;
-                    } else {
-                        break;
-                    }
-                }
-                while (preg_match('/^##(.*)##$/s', $rawMsg, $m)) {
-                    $inner = trim($m[1]);
-                    if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
-                        $rawMsg = $inner;
-                    } else {
-                        break;
-                    }
-                }
-
-                if ($isTrans === 0 && (strpos($rawMsg, ' ') !== false || preg_match('/^##.*##$/s', $row->message))) {
-                    try {
-                        Capsule::table('event_log')
-                            ->where('log_id', '=', (int) $row->log_id)
-                            ->update([
-                                'message' => $displayMsg,
-                                'is_translated' => 1,
-                            ]);
-                        $isTrans = 1;
-                    } catch (Exception $e) {
-                    }
-                }
-
-                $isPlugin = strpos($rawMsg, 'plugins.generic.editorialTimelineManager') !== false || strpos($displayMsg, 'Editorial workflow timeline dates were modified') !== false;
-
-                $logs[] = [
-                    'log_id' => (int) $row->log_id,
-                    'user_id' => (int) $row->user_id,
-                    'username' => $row->username ?: '',
-                    'user_full_name' => $row->username ?: 'User #' . $row->user_id,
-                    'date_logged' => $row->date_logged,
-                    'date_logged_formatted' => $row->date_logged ? date('Y-m-d\TH:i', strtotime($row->date_logged)) : '',
-                    'event_type' => (int) $row->event_type,
-                    'message' => $rawMsg,
-                    'display_message' => $displayMsg ?: $rawMsg,
-                    'is_translated' => $isTrans,
-                    'is_plugin_log' => $isPlugin,
-                    'params' => [],
-                ];
             }
         }
 
-        // Sort descending by date_logged or log_id
-        usort($logs, function ($a, $b) {
-            $tA = strtotime($a['date_logged'] ?: '1970-01-01');
-            $tB = strtotime($b['date_logged'] ?: '1970-01-01');
-            if ($tA == $tB) {
-                return $b['log_id'] - $a['log_id'];
+        $logs = [];
+
+        // Query both submission-level and file-level logs
+        $assocSub = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 0x0100009;
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+
+        $query = Capsule::table('event_log as el')
+            ->leftJoin('users as u', 'el.user_id', '=', 'u.user_id')
+            ->where(function ($q) use ($assocSub, $assocFile, $submissionId, $fileIds) {
+                $q->where(function ($sq) use ($assocSub, $submissionId) {
+                    $sq->where('el.assoc_type', '=', $assocSub)
+                       ->where('el.assoc_id', '=', $submissionId);
+                });
+                if (!empty($fileIds)) {
+                    $q->orWhere(function ($sq) use ($assocFile, $fileIds) {
+                        $sq->where('el.assoc_type', '=', $assocFile)
+                           ->whereIn('el.assoc_id', $fileIds);
+                    });
+                }
+            })
+            ->select(['el.*', 'u.username'])
+            ->orderBy('el.date_logged', 'desc')
+            ->orderBy('el.log_id', 'desc');
+
+        $dbRows = $query->get();
+
+        // Fetch settings (params) for all logs
+        $logIds = [];
+        foreach ($dbRows as $r) {
+            $logIds[] = (int) $r->log_id;
+        }
+
+        $settingsByLog = [];
+        if (!empty($logIds)) {
+            $stRows = Capsule::table('event_log_settings')->whereIn('log_id', $logIds)->get();
+            foreach ($stRows as $st) {
+                $settingsByLog[$st->log_id][$st->setting_name] = $st->setting_value;
             }
-            return $tB - $tA;
-        });
+        }
+
+        foreach ($dbRows as $row) {
+            $logId = (int) $row->log_id;
+            $userId = (int) $row->user_id;
+            $username = $row->username ?: '';
+            $userFullName = '';
+
+            if (isset($settingsByLog[$logId]['userFullName'])) {
+                $userFullName = $settingsByLog[$logId]['userFullName'];
+            }
+            if (empty($username) && isset($settingsByLog[$logId]['username'])) {
+                $username = $settingsByLog[$logId]['username'];
+            }
+            if (empty($userFullName) && $userId > 0) {
+                $u = $userDao ? $userDao->getById($userId) : null;
+                if ($u) {
+                    $userFullName = $u->getFullName();
+                    if (empty($username)) $username = $u->getUsername();
+                }
+            }
+            if (empty($userFullName)) {
+                $userFullName = $username ?: 'User #' . $userId;
+            }
+
+            $dateLogged = $row->date_logged;
+            $dateLoggedFormatted = $dateLogged ? date('Y-m-d\TH:i', strtotime($dateLogged)) : '';
+
+            $rawMsg = (string) $row->message;
+            $isTrans = (int) $row->is_translated;
+
+            $params = isset($settingsByLog[$logId]) ? $settingsByLog[$logId] : [];
+            $displayMsg = $isTrans ? $rawMsg : __($rawMsg, $params);
+            if (empty($displayMsg) || strpos($displayMsg, '##') !== false) {
+                $displayMsg = __($rawMsg);
+            }
+            if (empty($displayMsg)) {
+                $displayMsg = $rawMsg;
+            }
+
+            while (preg_match('/^##(.*)##$/s', $displayMsg, $m)) {
+                $inner = trim($m[1]);
+                if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
+                    $displayMsg = $inner;
+                } else {
+                    break;
+                }
+            }
+            while (preg_match('/^##(.*)##$/s', $rawMsg, $m)) {
+                $inner = trim($m[1]);
+                if (strpos($inner, ' ') !== false || !preg_match('/^[a-zA-Z0-9_.-]+$/', $inner)) {
+                    $rawMsg = $inner;
+                } else {
+                    break;
+                }
+            }
+
+            $isFileLog = ($row->assoc_type == $assocFile);
+            $fileMeta = null;
+            if ($isFileLog && isset($fileMap[$row->assoc_id])) {
+                $fn = isset($fileNames[$row->assoc_id]) ? $fileNames[$row->assoc_id] : ('File #' . $row->assoc_id);
+                $fileMeta = [
+                    'submission_file_id' => (int) $row->assoc_id,
+                    'file_stage' => $fileMap[$row->assoc_id]['file_stage'],
+                    'file_stage_name' => $fileMap[$row->assoc_id]['file_stage_name'],
+                    'filename' => $fn,
+                ];
+            }
+
+            $isPlugin = strpos($rawMsg, 'plugins.generic.editorialTimelineManager') !== false || strpos($displayMsg, 'Editorial workflow timeline dates were modified') !== false;
+
+            $logs[] = [
+                'log_id' => $logId,
+                'user_id' => $userId,
+                'username' => $username,
+                'user_full_name' => $userFullName,
+                'date_logged' => $dateLogged,
+                'date_logged_formatted' => $dateLoggedFormatted,
+                'event_type' => (int) $row->event_type,
+                'message' => $rawMsg,
+                'display_message' => $displayMsg ?: $rawMsg,
+                'is_translated' => $isTrans,
+                'is_plugin_log' => $isPlugin,
+                'is_file_log' => $isFileLog,
+                'assoc_type' => (int) $row->assoc_type,
+                'assoc_id' => (int) $row->assoc_id,
+                'file_meta' => $fileMeta,
+                'params' => $params,
+            ];
+        }
 
         return EditorialTimelineHelper::cleanUtf8($logs);
     }
@@ -1334,10 +1409,44 @@ class EditorialTimelineDAO extends DAO
         $logId = (int) $logId;
         $updates = [];
 
+        $logEntry = Capsule::table('event_log')->where('log_id', '=', $logId)->first();
+        if (!$logEntry) {
+            throw new Exception('Event log #' . $logId . ' not found in database.');
+        }
+
+        // Verify log belongs to submission or a file of this submission
+        $assocSub = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 0x0100009;
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+
+        $assocFileId = null;
+        if ($logEntry->assoc_type == $assocSub) {
+            if ($submissionId <= 0) {
+                $submissionId = (int) $logEntry->assoc_id;
+            }
+        } elseif ($logEntry->assoc_type == $assocFile) {
+            $fileQuery = Capsule::table('submission_files')
+                ->where('submission_file_id', '=', (int) $logEntry->assoc_id);
+            if ($submissionId > 0) {
+                $fileQuery->where('submission_id', '=', $submissionId);
+            }
+            $fileRow = $fileQuery->first();
+            if (!$fileRow) {
+                $fileRow = Capsule::table('submission_files')
+                    ->where('submission_file_id', '=', (int) $logEntry->assoc_id)
+                    ->first();
+            }
+            if ($fileRow) {
+                $assocFileId = (int) $fileRow->submission_file_id;
+                if ($submissionId <= 0 && !empty($fileRow->submission_id)) {
+                    $submissionId = (int) $fileRow->submission_id;
+                }
+            }
+        }
+
         if (isset($data['date_logged']) && !empty($data['date_logged'])) {
             $updates['date_logged'] = EditorialTimelineHelper::fromHtmlDatetime($data['date_logged']);
         }
-        if (isset($data['user_id'])) {
+        if (isset($data['user_id']) && (int) $data['user_id'] > 0) {
             $newUserId = (int) $data['user_id'];
             $updates['user_id'] = $newUserId;
 
@@ -1364,11 +1473,318 @@ class EditorialTimelineDAO extends DAO
             return 0;
         }
 
-        return Capsule::table('event_log')
-            ->where('log_id', '=', $logId)
-            ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION)
-            ->where('assoc_id', '=', $submissionId)
-            ->update($updates);
+        $affected = 0;
+        if (!empty($updates)) {
+            $affected = Capsule::table('event_log')->where('log_id', '=', $logId)->update($updates);
+        }
+
+        // Synchronize file timestamp if this is a file log
+        $fileSynced = false;
+        if ($assocFileId && isset($updates['date_logged'])) {
+            $syncFile = !isset($data['sync_file']) || (bool) $data['sync_file'];
+            if ($syncFile) {
+                Capsule::table('submission_files')
+                    ->where('submission_file_id', '=', $assocFileId)
+                    ->update([
+                        'created_at' => $updates['date_logged'],
+                        'updated_at' => $updates['date_logged'],
+                    ]);
+
+                // Also update all other upload log entries for this file to keep history in sync
+                Capsule::table('event_log')
+                    ->where('assoc_type', '=', $assocFile)
+                    ->where('assoc_id', '=', $assocFileId)
+                    ->update([
+                        'date_logged' => $updates['date_logged'],
+                    ]);
+
+                $fileSynced = true;
+                $fileDao = DAORegistry::getDAO('SubmissionFileDAO');
+                if ($fileDao && method_exists($fileDao, 'flushCache')) {
+                    $fileDao->flushCache();
+                }
+            }
+        }
+
+        $finalDate = $updates['date_logged'] ?? $logEntry->date_logged;
+        $finalFormatted = $finalDate ? date('Y-m-d\TH:i', strtotime($finalDate)) : '';
+        $finalDisplay = $finalDate ? date('Y-m-d H:i', strtotime($finalDate)) : '';
+
+        return [
+            'affected' => max($affected, 1),
+            'log_id' => $logId,
+            'submission_id' => $submissionId,
+            'date_logged' => $finalDate,
+            'date_logged_formatted' => $finalFormatted,
+            'date_logged_display' => $finalDisplay,
+            'file_id' => $assocFileId,
+            'file_synced' => $fileSynced,
+        ];
+    }
+
+    /**
+     * Quick direct update for date & time of any event log entry.
+     *
+     * @param int $submissionId
+     * @param int $contextId
+     * @param int $logId
+     * @param string $dateLogged
+     * @param bool $syncFile
+     * @return array
+     */
+    public function directUpdateEventLogDate($submissionId, $contextId, $logId, $dateLogged, $syncFile = true)
+    {
+        return $this->directUpdateActivityLog($submissionId, $contextId, $logId, [
+            'date_logged' => $dateLogged,
+            'sync_file' => $syncFile ? 1 : 0,
+        ]);
+    }
+
+    /**
+     * Get details for an individual event log entry.
+     *
+     * @param int $submissionId
+     * @param int $contextId
+     * @param int $logId
+     * @return array|null
+     */
+    public function getEventLogDetails($submissionId, $contextId, $logId)
+    {
+        $submissionId = (int) $submissionId;
+        $logId = (int) $logId;
+
+        $entry = Capsule::table('event_log as el')
+            ->leftJoin('users as u', 'el.user_id', '=', 'u.user_id')
+            ->where('el.log_id', '=', $logId)
+            ->select(['el.*', 'u.username'])
+            ->first();
+
+        if (!$entry) {
+            return null;
+        }
+
+        $assocSub = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 0x0100009;
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+
+        $isAssocSub = ((int) $entry->assoc_type === 1048585 || (int) $entry->assoc_type === 16777225 || (int) $entry->assoc_type === (int) $assocSub);
+        $isAssocFile = ((int) $entry->assoc_type === 515 || (int) $entry->assoc_type === (int) $assocFile);
+
+        $fileId = null;
+        if ($isAssocSub) {
+            if ($submissionId <= 0) {
+                $submissionId = (int) $entry->assoc_id;
+            } elseif ((int) $entry->assoc_id !== $submissionId) {
+                return null;
+            }
+        } elseif ($isAssocFile) {
+            $fileQuery = Capsule::table('submission_files')
+                ->where('submission_file_id', '=', (int) $entry->assoc_id);
+            if ($submissionId > 0) {
+                $fileQuery->where('submission_id', '=', $submissionId);
+            }
+            $fileRow = $fileQuery->first();
+            if (!$fileRow) {
+                $fileRow = Capsule::table('submission_files')
+                    ->where('submission_file_id', '=', (int) $entry->assoc_id)
+                    ->first();
+            }
+            if (!$fileRow) {
+                return null;
+            }
+            $fileId = (int) $fileRow->submission_file_id;
+            if ($submissionId <= 0 && !empty($fileRow->submission_id)) {
+                $submissionId = (int) $fileRow->submission_id;
+            }
+        } else {
+            // Other event logs
+            if ($submissionId <= 0 && !empty($entry->assoc_id)) {
+                $submissionId = (int) $entry->assoc_id;
+            }
+        }
+
+        $dateLogged = $entry->date_logged;
+        $dateLoggedFormatted = $dateLogged ? date('Y-m-d\TH:i', strtotime($dateLogged)) : '';
+
+        return [
+            'log_id' => (int) $entry->log_id,
+            'assoc_type' => (int) $entry->assoc_type,
+            'assoc_id' => (int) $entry->assoc_id,
+            'file_id' => $fileId,
+            'submission_id' => $submissionId,
+            'user_id' => (int) $entry->user_id,
+            'username' => $entry->username ?: '',
+            'date_logged' => $dateLogged,
+            'date_logged_formatted' => $dateLoggedFormatted,
+            'event_type' => (int) $entry->event_type,
+            'message' => $entry->message,
+        ];
+    }
+
+    /**
+     * Directly update a single workflow file's created_at / updated_at and sync its history.
+     *
+     * @param int $submissionId
+     * @param int $contextId
+     * @param int $submissionFileId
+     * @param string $createdAt
+     * @param string|null $updatedAt
+     * @param bool $syncHistory
+     * @return array
+     */
+    public function directUpdateFileDateAndHistory($submissionId, $contextId, $submissionFileId, $createdAt, $updatedAt = null, $syncHistory = true)
+    {
+        $submissionId = (int) $submissionId;
+        $submissionFileId = (int) $submissionFileId;
+
+        $fileQuery = Capsule::table('submission_files')
+            ->where('submission_file_id', '=', $submissionFileId);
+        if ($submissionId > 0) {
+            $fileQuery->where('submission_id', '=', $submissionId);
+        }
+        $fileRow = $fileQuery->first();
+        if (!$fileRow) {
+            $fileRow = Capsule::table('submission_files')
+                ->where('submission_file_id', '=', $submissionFileId)
+                ->first();
+        }
+
+        if (!$fileRow) {
+            throw new Exception('File #' . $submissionFileId . ' not found in database.');
+        }
+
+        if ($submissionId <= 0 && !empty($fileRow->submission_id)) {
+            $submissionId = (int) $fileRow->submission_id;
+        }
+
+        $dbCreatedAt = EditorialTimelineHelper::fromHtmlDatetime($createdAt);
+        if (!$dbCreatedAt) {
+            throw new Exception('Invalid created_at date format: ' . $createdAt);
+        }
+
+        $dbUpdatedAt = !empty($updatedAt) ? EditorialTimelineHelper::fromHtmlDatetime($updatedAt) : $dbCreatedAt;
+
+        $updateData = [
+            'created_at' => $dbCreatedAt,
+            'updated_at' => $dbUpdatedAt,
+        ];
+
+        $affectedFiles = Capsule::table('submission_files')
+            ->where('submission_file_id', '=', $submissionFileId)
+            ->update($updateData);
+
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+        $affectedLogs = 0;
+        if ($syncHistory) {
+            $affectedLogs = Capsule::table('event_log')
+                ->where('assoc_type', '=', $assocFile)
+                ->where('assoc_id', '=', $submissionFileId)
+                ->update(['date_logged' => $dbCreatedAt]);
+        }
+
+        $fileDao = DAORegistry::getDAO('SubmissionFileDAO');
+        if ($fileDao && method_exists($fileDao, 'flushCache')) {
+            $fileDao->flushCache();
+        }
+
+        $formattedDisplay = date('M j, Y', strtotime($dbCreatedAt));
+
+        return [
+            'submission_file_id' => $submissionFileId,
+            'submission_id' => $submissionId,
+            'created_at' => $dbCreatedAt,
+            'updated_at' => $dbUpdatedAt,
+            'created_at_formatted' => date('Y-m-d\TH:i', strtotime($dbCreatedAt)),
+            'updated_at_formatted' => date('Y-m-d\TH:i', strtotime($dbUpdatedAt)),
+            'display_date' => $formattedDisplay,
+            'affected_files' => max($affectedFiles, 1),
+            'affected_logs' => $affectedLogs,
+        ];
+    }
+
+    /**
+     * Directly update a note's date_created and date_modified.
+     *
+     * @param int $submissionId
+     * @param int $contextId
+     * @param int $noteId
+     * @param string $dateCreated
+     * @return array
+     */
+    public function directUpdateNoteDate($submissionId, $contextId, $noteId, $dateCreated)
+    {
+        $submissionId = (int) $submissionId;
+        $noteId = (int) $noteId;
+
+        $noteRow = Capsule::table('notes')->where('note_id', '=', $noteId)->first();
+        if (!$noteRow) {
+            throw new Exception('Note not found.');
+        }
+
+        $assocQuery = defined('ASSOC_TYPE_QUERY') ? ASSOC_TYPE_QUERY : 0x010000a;
+        $assocSub = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 0x0100009;
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+
+        if ($submissionId <= 0) {
+            if ($noteRow->assoc_type == $assocQuery) {
+                $q = Capsule::table('queries')->where('query_id', '=', (int) $noteRow->assoc_id)->first();
+                if ($q && $q->assoc_type == $assocSub) {
+                    $submissionId = (int) $q->assoc_id;
+                }
+            } elseif ($noteRow->assoc_type == $assocFile) {
+                $sf = Capsule::table('submission_files')->where('submission_file_id', '=', (int) $noteRow->assoc_id)->first();
+                if ($sf) {
+                    $submissionId = (int) $sf->submission_id;
+                }
+            } elseif ($noteRow->assoc_type == $assocSub) {
+                $submissionId = (int) $noteRow->assoc_id;
+            }
+        }
+
+        $valid = ($submissionId <= 0);
+        if ($noteRow->assoc_type == $assocQuery) {
+            $valid = Capsule::table('queries')
+                ->where('query_id', '=', (int) $noteRow->assoc_id)
+                ->where('assoc_type', '=', $assocSub)
+                ->where('assoc_id', '=', $submissionId)
+                ->exists() || ($submissionId <= 0);
+        } elseif ($noteRow->assoc_type == $assocFile) {
+            $valid = Capsule::table('submission_files')
+                ->where('submission_file_id', '=', (int) $noteRow->assoc_id)
+                ->where('submission_id', '=', $submissionId)
+                ->exists() || ($submissionId <= 0);
+        } elseif ($noteRow->assoc_type == $assocSub) {
+            $valid = ((int) $noteRow->assoc_id === $submissionId) || ($submissionId <= 0);
+        }
+
+        if (!$valid && $submissionId > 0) {
+            throw new Exception('Note does not belong to this submission.');
+        }
+
+        $dbDate = EditorialTimelineHelper::fromHtmlDatetime($dateCreated);
+        if (!$dbDate) {
+            throw new Exception('Invalid note date format.');
+        }
+
+        $affected = Capsule::table('notes')
+            ->where('note_id', '=', $noteId)
+            ->update([
+                'date_created' => $dbDate,
+                'date_modified' => $dbDate,
+            ]);
+
+        $noteDao = DAORegistry::getDAO('NoteDAO');
+        if ($noteDao && method_exists($noteDao, 'flushCache')) {
+            $noteDao->flushCache();
+        }
+
+        return [
+            'note_id' => $noteId,
+            'submission_id' => $submissionId,
+            'date_created' => $dbDate,
+            'date_created_formatted' => date('Y-m-d\TH:i', strtotime($dbDate)),
+            'display_date' => date('Y-m-d H:i', strtotime($dbDate)),
+            'affected' => max($affected, 1),
+        ];
     }
 
     /**
@@ -1384,14 +1800,25 @@ class EditorialTimelineDAO extends DAO
         $submissionId = (int) $submissionId;
         $logId = (int) $logId;
 
-        // Verify entry belongs to this submission
-        $entry = Capsule::table('event_log')
-            ->where('log_id', '=', $logId)
-            ->where('assoc_type', '=', ASSOC_TYPE_SUBMISSION)
-            ->where('assoc_id', '=', $submissionId)
-            ->first();
-
+        $entry = Capsule::table('event_log')->where('log_id', '=', $logId)->first();
         if (!$entry) {
+            return 0;
+        }
+
+        $assocSub = defined('ASSOC_TYPE_SUBMISSION') ? ASSOC_TYPE_SUBMISSION : 0x0100009;
+        $assocFile = defined('ASSOC_TYPE_SUBMISSION_FILE') ? ASSOC_TYPE_SUBMISSION_FILE : 0x0000203;
+
+        $valid = false;
+        if ($entry->assoc_type == $assocSub && (int) $entry->assoc_id === $submissionId) {
+            $valid = true;
+        } elseif ($entry->assoc_type == $assocFile) {
+            $valid = Capsule::table('submission_files')
+                ->where('submission_file_id', '=', (int) $entry->assoc_id)
+                ->where('submission_id', '=', $submissionId)
+                ->exists();
+        }
+
+        if (!$valid) {
             return 0;
         }
 

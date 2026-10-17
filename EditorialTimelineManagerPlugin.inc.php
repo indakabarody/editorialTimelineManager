@@ -182,6 +182,21 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
             case 'directUpdateActivityLog':
                 return $handler->directUpdateActivityLog($args, $request);
 
+            case 'directUpdateEventLogDate':
+                return $handler->directUpdateEventLogDate($args, $request);
+
+            case 'getEventLogDetails':
+                return $handler->getEventLogDetails($args, $request);
+
+            case 'directUpdateFileDate':
+                return $handler->directUpdateFileDate($args, $request);
+
+            case 'directUpdateNoteDate':
+                return $handler->directUpdateNoteDate($args, $request);
+
+            case 'getFileTimelineDetails':
+                return $handler->getFileTimelineDetails($args, $request);
+
             case 'deleteActivityLog':
                 return $handler->deleteActivityLog($args, $request);
 
@@ -257,11 +272,41 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
         $timelineUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'manage', null, [
             'submissionId' => $submissionId,
         ]);
+        $updateEventLogDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateEventLogDate', null, [
+            'submissionId' => $submissionId,
+        ]);
+        $getEventLogDetailsUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'getEventLogDetails', null, [
+            'submissionId' => $submissionId,
+        ]);
+        $updateFileDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateFileDate', null, [
+            'submissionId' => $submissionId,
+        ]);
+        $updateNoteDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateNoteDate', null, [
+            'submissionId' => $submissionId,
+        ]);
+        $updateActivityLogUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateActivityLog', null, [
+            'submissionId' => $submissionId,
+        ]);
+        $getFileDetailsUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'getFileTimelineDetails', null, [
+            'submissionId' => $submissionId,
+        ]);
+
+        $csrfToken = '';
+        if ($request->getUser()) {
+            $csrfToken = $request->getSession()->getCSRFToken();
+        }
 
         $smarty->assign([
             'editorialTimelineIsAuthorized' => true,
             'editorialTimelineUrl' => $timelineUrl,
             'editorialTimelineSubmissionId' => $submissionId,
+            'editorialTimelineCsrfToken' => $csrfToken,
+            'editorialTimelineUpdateEventLogDateUrl' => $updateEventLogDateUrl,
+            'editorialTimelineGetEventLogDetailsUrl' => $getEventLogDetailsUrl,
+            'editorialTimelineUpdateFileDateUrl' => $updateFileDateUrl,
+            'editorialTimelineUpdateNoteDateUrl' => $updateNoteDateUrl,
+            'editorialTimelineUpdateActivityLogUrl' => $updateActivityLogUrl,
+            'editorialTimelineGetFileDetailsUrl' => $getFileDetailsUrl,
             'pluginName' => $this->getName(),
         ]);
 
@@ -297,6 +342,120 @@ class EditorialTimelineManagerPlugin extends GenericPlugin
 
         $templateMgr->addStyleSheet('editorialTimelineCss', $baseUrl . '/' . $pluginPath . '/css/editorialTimeline.css?v=' . $vCss, ['contexts' => 'backend']);
         $templateMgr->addJavaScript('editorialTimelineJs', $baseUrl . '/' . $pluginPath . '/js/editorialTimeline.js?v=' . $vJs, ['contexts' => 'backend']);
+
+        // Resolve submission ID from template vars, query parameters, or URL path
+        $submission = $templateMgr->getTemplateVars('submission');
+        $submissionId = 0;
+        if ($submission) {
+            $submissionId = is_object($submission) && method_exists($submission, 'getId') ? (int) $submission->getId() : (isset($submission['id']) ? (int) $submission['id'] : 0);
+        }
+        if (!$submissionId) {
+            $submissionId = (int) ($request->getUserVar('submissionId') ?: $request->getUserVar('articleId'));
+        }
+        if (!$submissionId) {
+            $args = (array) $request->getRequestedArgs();
+            if (!empty($args[0]) && is_numeric($args[0])) {
+                $submissionId = (int) $args[0];
+            }
+        }
+
+        $dispatcher = $request->getDispatcher();
+        $csrfToken = ($request->getUser() && $request->getSession()) ? $request->getSession()->getCSRFToken() : '';
+
+        $context = $request->getContext();
+        $contextPath = $context ? $context->getPath() : '';
+        $timelineUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'manage', null, ['submissionId' => $submissionId]);
+        $updateEventLogDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateEventLogDate', null, ['submissionId' => $submissionId]);
+        $getEventLogDetailsUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'getEventLogDetails', null, ['submissionId' => $submissionId]);
+        $updateFileDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateFileDate', null, ['submissionId' => $submissionId]);
+        $updateNoteDateUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateNoteDate', null, ['submissionId' => $submissionId]);
+        $updateActivityLogUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateActivityLog', null, ['submissionId' => $submissionId]);
+        $getFileDetailsUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'getFileTimelineDetails', null, ['submissionId' => $submissionId]);
+        $directUpdateFilesUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateFiles', null, ['submissionId' => $submissionId]);
+        $directUpdateReviewUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateReview', null, ['submissionId' => $submissionId]);
+        $directUpdateDecisionUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'directUpdateDecision', null, ['submissionId' => $submissionId]);
+        $createActivityLogUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'createActivityLog', null, ['submissionId' => $submissionId]);
+        $deleteActivityLogUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'deleteActivityLog', null, ['submissionId' => $submissionId]);
+        $cleanPluginActivityLogsUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'cleanPluginActivityLogs', null, ['submissionId' => $submissionId]);
+        $saveUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'saveTimeline', null, ['submissionId' => $submissionId]);
+        $shiftUrl = $dispatcher->url($request, ROUTE_PAGE, null, 'editorialTimeline', 'shiftTimeline', null, ['submissionId' => $submissionId]);
+
+        $config = [
+            'submissionId' => $submissionId,
+            'csrfToken' => $csrfToken,
+            'baseUrl' => $baseUrl,
+            'contextPath' => $contextPath,
+            'timelineUrl' => $timelineUrl,
+            // Event log update
+            'updateEventLogDateUrl' => $updateEventLogDateUrl,
+            'directUpdateEventLogDateUrl' => $updateEventLogDateUrl,
+            'getEventLogDetailsUrl' => $getEventLogDetailsUrl,
+            // File date update
+            'updateFileDateUrl' => $updateFileDateUrl,
+            'directUpdateFileDateUrl' => $updateFileDateUrl,
+            'getFileDetailsUrl' => $getFileDetailsUrl,
+            'getFileTimelineDetailsUrl' => $getFileDetailsUrl,
+            // Note date update
+            'updateNoteDateUrl' => $updateNoteDateUrl,
+            'directUpdateNoteDateUrl' => $updateNoteDateUrl,
+            // Activity log update
+            'updateActivityLogUrl' => $updateActivityLogUrl,
+            'directUpdateActivityLogUrl' => $updateActivityLogUrl,
+            'createActivityLogUrl' => $createActivityLogUrl,
+            'deleteActivityLogUrl' => $deleteActivityLogUrl,
+            'cleanPluginActivityLogsUrl' => $cleanPluginActivityLogsUrl,
+            // Files bulk, review, decision
+            'directUpdateFilesUrl' => $directUpdateFilesUrl,
+            'directUpdateReviewUrl' => $directUpdateReviewUrl,
+            'directUpdateDecisionUrl' => $directUpdateDecisionUrl,
+            // Timeline save & shift
+            'saveUrl' => $saveUrl,
+            'saveTimelineUrl' => $saveUrl,
+            'shiftUrl' => $shiftUrl,
+            'shiftTimelineUrl' => $shiftUrl,
+        ];
+
+        AppLocale::requireComponents(
+            LOCALE_COMPONENT_PKP_SUBMISSION,
+            LOCALE_COMPONENT_APP_SUBMISSION,
+            LOCALE_COMPONENT_PKP_EDITOR,
+            LOCALE_COMPONENT_APP_EDITOR,
+            LOCALE_COMPONENT_PKP_GRID,
+            LOCALE_COMPONENT_PKP_DEFAULT,
+            LOCALE_COMPONENT_APP_DEFAULT,
+            LOCALE_COMPONENT_PKP_MANAGER,
+            LOCALE_COMPONENT_APP_MANAGER,
+            LOCALE_COMPONENT_PKP_COMMON,
+            LOCALE_COMPONENT_APP_COMMON
+        );
+
+        $locales = [
+            'displayName' => __('plugins.generic.editorialTimelineManager.displayName'),
+            'editDateTime' => __('plugins.generic.editorialTimelineManager.editDateTime'),
+            'dateUpdatedSuccess' => __('plugins.generic.editorialTimelineManager.dateUpdatedSuccess'),
+            'fileUpdatedSuccess' => __('plugins.generic.editorialTimelineManager.fileUpdatedSuccess'),
+            'noteUpdatedSuccess' => __('plugins.generic.editorialTimelineManager.noteUpdatedSuccess'),
+            'quickEditFileDate' => __('plugins.generic.editorialTimelineManager.quickEditFileDate'),
+            'selectDatePrompt' => __('plugins.generic.editorialTimelineManager.selectDatePrompt'),
+            'save' => __('plugins.generic.editorialTimelineManager.save'),
+            'cancel' => __('plugins.generic.editorialTimelineManager.cancel'),
+            'saving' => __('plugins.generic.editorialTimelineManager.saving'),
+            'networkError' => __('plugins.generic.editorialTimelineManager.error.network'),
+            'serverError' => __('plugins.generic.editorialTimelineManager.error.server'),
+            'updateFilesError' => __('plugins.generic.editorialTimelineManager.error.updateFiles'),
+        ];
+
+        $inlineJs = 'window.EditorialTimelineConfig = window.EditorialTimelineConfig || {}; Object.assign(window.EditorialTimelineConfig, ' . json_encode($config) . ');' . "\n" .
+            'window.EditorialTimelineLocales = window.EditorialTimelineLocales || {}; Object.assign(window.EditorialTimelineLocales, ' . json_encode($locales) . ');';
+
+        $templateMgr->addJavaScript('editorialTimelineConfig', $inlineJs, [
+            'contexts' => 'backend',
+            'inline' => true,
+            'priority' => STYLE_SEQUENCE_CORE,
+        ]);
+        $templateMgr->addHeader('editorialTimelineConfig', '<script type="text/javascript">' . $inlineJs . '</script>', [
+            'contexts' => 'backend',
+        ]);
 
         return false;
     }
